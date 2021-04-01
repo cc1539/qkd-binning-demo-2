@@ -1,0 +1,223 @@
+
+/***************************** GENERAL *****************************/
+
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: open sans;
+	font-size: 13px;
+	background-color: #222222;
+	color: white;
+	outline: none;
+}
+
+#defaultCanvas0 {
+	position: fixed;
+	left: 0;
+	up: 0;
+}
+
+body {
+	background-color: black;
+}
+
+div::-webkit-scrollbar {
+	width: 5px;
+}
+ 
+div::-webkit-scrollbar-track {
+	background-color: #111111;
+}
+ 
+div::-webkit-scrollbar-thumb {
+	background-color: #444444;
+}
+
+/***************************** INFORMATION *****************************/
+
+#info {
+	background-color: white;
+	position: fixed;
+	right: 0;
+	up: 0;
+	width: 500px;
+	height: 100vh;
+	z-index: 1;
+	box-shadow: 0 0 10px rgba(255,255,255,.5);
+}
+
+#info .content {
+	width: 100%;
+	height: 100%;
+	overflow-y: scroll;
+	box-sizing: border-box;
+	padding: 20px 24px 20px 24px;
+}
+
+#info p {
+	margin-bottom: 10px;
+	color: white;
+}
+
+#info .toggle {
+	position: absolute;
+	left: -50px;
+	up: 0;
+	width: 50px;
+	height: 50px;
+	outline: none;
+	font-family: latin modern math;
+	font-size: 30px;
+	border-radius: 0 0 0 5px;
+	box-shadow: 0 0 10px rgba(255,255,255,.5);
+	z-index: -1;
+	color: white;
+}
+
+#info .toggle:hover {
+	box-shadow: 0 0 20px rgba(255,255,255,.7);
+}
+
+/***************************** CONTROLS *****************************/
+
+#controls {
+	background-color: white;
+	position: fixed;
+	left: 0;
+	up: 0;
+	width: 350px;
+	height: 100vh;
+	z-index: 1;
+	box-shadow: 0 0 10px rgba(255,255,255,.5);
+}
+
+#controls .content {
+	width: 100%;
+	height: 100%;
+	overflow-y: scroll;
+	box-sizing: border-box;
+	padding: 10px 14px 10px 14px;
+	direction: rtl;
+}
+
+#controls .toggle {
+	position: absolute;
+	left: 100%;
+	up: 0;
+	width: 50px;
+	height: 50px;
+	outline: none;
+	font-family: latin modern math;
+	font-size: 30px;
+	border-radius: 0 0 5px 0;
+	box-shadow: 0 0 10px rgba(255,255,255,.5);
+	z-index: -1;
+	color: white;
+}
+
+#controls .toggle:hover {
+	box-shadow: 0 0 20px rgba(255,255,255,.7);
+}
+
+#controls .content .plot-control {
+	direction: ltr;
+}
+
+#controls .param {
+	margin-bottom: 10px;
+}
+
+#controls select, #controls input {
+	outline: none;
+	background-color: #111111;
+	margin-left: 10px;
+	float: right;
+	height: 20px;
+}
+
+#controls select {
+	width: 190px;
+}
+
+#controls input[type="text"] {
+	width: 50px;
+	padding-left: 5px;
+}
+
+#controls input[type="range"] {
+	width: 130px;
+}
+
+#controls .controls button {
+	position: relative;
+	background-color: #444444;
+	width: calc(100% - 50px);
+	left: 50%;
+	transform: translateX(-50%);
+	height: 30px;
+}
+
+#controls .titlebar p {
+	position: relative;
+	top: 50%;
+	transform: translateY(calc(-50% - 1px));
+	background-color: #444444;
+	
+	float: left;
+}
+
+#controls .titlebar input {
+	z-index: 2;
+	height: 30px;
+	width: 27px;
+	float: left;
+	margin-left: -3px;
+	margin-right: 10px;
+	background-color: rgba(0,0,0,0);
+	transform: translate(0,-5px);
+	border-radius: 2px;
+}
+
+#controls .titlebar {
+	direction: ltr;
+	background-color: #444444;
+	width: 100%;
+	height: 40px;
+	box-sizing: border-box;
+	padding: 10px;
+}
+
+#controls .add-plot-button p {
+	position: relative;
+	top: 50%;
+	transform: translateY(calc(-50% - 1px));
+	background-color: #444444;
+	text-align: center;
+	width: 100%;
+	float: left;
+}
+
+#controls .add-plot-button input {
+	z-index: 2;
+	height: 30px;
+	width: 27px;
+	float: left;
+	margin-left: -3px;
+	margin-right: 10px;
+	background-color: rgba(0,0,0,0);
+	transform: translate(0,-5px);
+	border-radius: 2px;
+}
+
+#controls .add-plot-button {
+	direction: ltr;
+	background-color: #444444;
+	width: calc(100%);
+	height: 30px;
+	box-sizing: border-box;
+	padding: 10px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+

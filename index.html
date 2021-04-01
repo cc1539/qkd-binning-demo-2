@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>QKD Simulation</title>
+		<link href="def.css" type="text/css" rel="stylesheet">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/p5@1.3.1/lib/p5.js"></script>
+		<script src="main.js"></script>
+	</head>
+	<body>
+		<div id="controls">
+			<button class="toggle">&#9881;&#65039;</button>
+			<div class="content">
+				<div class="add-plot-button">
+					<p>Add New Plot</p>
+				</div>
+				<div class="plot-control">
+					<div class="titlebar">
+						<input name="d" type="color"></input>
+						<p>Simple Binning, n=8, d=0</p>
+						<p class="del" style="font-size:15px; float:right; margin-left:10px;">&#10060;</p>
+						<p class="dup" style="font-size:15px; float:right;">&#128209;</p>
+					</div>
+					<div class="controls" style="margin-top: 10px; padding: 10px;">
+					
+						<div class="param"><label>Bin Scheme</label>
+						<select name="scheme">
+							<option value="sb">Simple Binning</option>
+							<option value="ab">Adaptive Binning</option>
+							<option value="aab">Aggregated Adaptive Binning</option>
+							<option value="af">Adaptive Framing</option>
+						</select></div><hr>
+						
+						<div class="param"><label>Sim. Type</label>
+						<select name="sim">
+							<option value="empirical">Empirical</option>
+							<option value="analytical">Analytical</option>
+						</select></div><hr>
+						
+						<div class="param"><label>n</label><input name="n" type="text" autocomplete="off" value="8"></input><input type="range" step="1" name="n" min="0" max="12"></div><hr>
+						<div class="param"><label>d</label><input name="d" type="text" autocomplete="off" value="0"></input><input type="range" step="1" name="d" min="0" max="256"></div><hr>
+						<div class="param"><label>J</label><input name="J" type="text" autocomplete="off" value="0.01"></input><input type="range" step="0.01" name="J" min="0" max="1"></div><hr>
+						<div class="param"><label>a</label><input name="a" type="text" autocomplete="off" value="0.01"></input><input type="range" step="0.01" name="a" min="0" max="1"></div><hr>
+						<div class="param"><label>f</label><input name="f" type="text" autocomplete="off" value="0.01"></input><input type="range" step="0.01" name="f" min="0" max="1"></div><hr>
+						<button>Update Plot</button>
+						<br><br>
+						
+						<div class="param"><label>Sample Sequence Length (in bits)</label><input name="sampleseq" type="text" autocomplete="off" value="65535"></input></div><hr>
+						<button>Download Sample Sequence</button>
+						<br>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="info">
+			<button class="toggle">&#8505;&#65039;</button>
+			<div class="content">
+				<p>What you're seeing here is the result of attempting to use time binning to extract information from a stream of bits. The incoming bits are modeled as an iid Bernoulli(p) distribution, corresponding to a probability p of any one time bin being occupied by at least one photon. However, these bits may also be altered by various sources of error, including jitter J, recovery-time d, absorption probability a, and dark count probability f.</p>
+				<p>The plots to the left are of keyrate R, entropy ratio H, and entropy rate I vs the parameter p introduced above. The key rate R is how many literal bits on average we can extract per time bin. The entropy ratio H is how many bits of true information theoretic information we obtain per literal bit. The entropy rate I is simply the key rate R and entropy ratio H multiplied.</p>
+				<p>For any plot, you can choose to use an empirical simulation or an analytical simulation. The empirical simulation actually generates bits internally (that is, by using Math.random()) and applies the chosen binning scheme to extract actual bits. The empirical entropy ratio is calculated as shannon entropy. The analytical simulation uses a markov chain to model the system. Under ideal conditions, we don't even have to go as far as using a markov chain to obtain the key rate R, but in the case of recovery time d greater than zero, the occupancy of our bins are no longer iid, and a form of memory must be included in our analysis to produce accurate results.</p>
+				<br>
+				<p>
+					<b>Summary</b><br>
+					<p>p = initial probability of time bin being occupied</p>
+					<p>J = probability that if a time bin is occupied, it becomes unoccupied and the next bin becomes occupied</p>
+					<p>d = the number of bins that cannot be detected as occupied after previously detecting an occupied bin</p>
+					<p>a = the probability that an occupied bin is erroneously seen as unoccupied</p>
+					<p>f = the probability that an unoccupied bin is erroneously seen as occupied</p>
+					<p>R = the raw key rate, average literal bits extracted per time bin</p>
+					<p>H = entropy ratio, how many information theoretic bits are extracted per literal bit</p>
+					<p>I = entropy rate, how many information theoretic bits are extracted per time bin</p>
+				</p>
+			</div>
+		</div>
+		
+		<div id="canvas"></div>
+	</body>
+</html>
