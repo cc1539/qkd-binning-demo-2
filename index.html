@@ -7,6 +7,18 @@
 		
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/p5@1.3.1/lib/p5.js"></script>
+		
+		<script src="qkdcode/BitStream.js"></script>
+		<script src="qkdcode/RandomAnalysis.js"></script>
+		<script src="qkdcode/SimpleBinning.js"></script>
+		<script src="qkdcode/AdaptiveBinning.js"></script>
+		<script src="qkdcode/AdaptiveAggregatedBinning.js"></script>
+		<script src="qkdcode/AdaptiveFraming.js"></script>
+		<script src="qkdcode/BinningScheme.js"></script>
+		<script src="qkdcode/markov/LinAlg.js"></script>
+		<script src="qkdcode/markov/TimeBinningMarkovChain.js"></script>
+		<script src="plot.js"></script>
+		
 		<script src="main.js"></script>
 	</head>
 	<body>
@@ -18,8 +30,8 @@
 				</div>
 				<div class="plot-control">
 					<div class="titlebar">
-						<input name="d" type="color"></input>
-						<p>Simple Binning, n=8, d=0</p>
+						<input type="color"></input>
+						<p>Simple Binning</p>
 						<p class="del" style="font-size:15px; float:right; margin-left:10px;">&#10060;</p>
 						<p class="dup" style="font-size:15px; float:right;">&#128209;</p>
 					</div>
@@ -39,11 +51,16 @@
 							<option value="analytical">Analytical</option>
 						</select></div><hr>
 						
-						<div class="param"><label>n</label><input name="n" type="text" autocomplete="off" value="8"></input><input type="range" step="1" name="n" min="0" max="12"></div><hr>
-						<div class="param"><label>d</label><input name="d" type="text" autocomplete="off" value="0"></input><input type="range" step="1" name="d" min="0" max="256"></div><hr>
-						<div class="param"><label>J</label><input name="J" type="text" autocomplete="off" value="0.01"></input><input type="range" step="0.01" name="J" min="0" max="1"></div><hr>
-						<div class="param"><label>a</label><input name="a" type="text" autocomplete="off" value="0.01"></input><input type="range" step="0.01" name="a" min="0" max="1"></div><hr>
-						<div class="param"><label>f</label><input name="f" type="text" autocomplete="off" value="0.01"></input><input type="range" step="0.01" name="f" min="0" max="1"></div><hr>
+						<div class="param"><label>Frame Size</label><input name="n" type="text" autocomplete="off" value="8"></input>
+						<input type="range" step="1" name="n" min="0" max="32"></div><hr>
+						<div class="param"><label>Recovery time</label><input name="d" type="text" autocomplete="off" value="0"></input>
+						<input type="range" step="1" name="d" min="0" max="256"></div><hr>
+						<div class="param"><label>P(Jitter)</label><input name="J" type="text" autocomplete="off" value="0.01"></input>
+						<input type="range" step="0.01" name="J" min="0" max="1"></div><hr>
+						<div class="param"><label>P(Absorption)</label><input name="a" type="text" autocomplete="off" value="0.01"></input>
+						<input type="range" step="0.01" name="a" min="0" max="1"></div><hr>
+						<div class="param"><label>P(Dark Count)</label><input name="f" type="text" autocomplete="off" value="0.01"></input>
+						<input type="range" step="0.01" name="f" min="0" max="1"></div><hr>
 						<button>Update Plot</button>
 						<br><br>
 						

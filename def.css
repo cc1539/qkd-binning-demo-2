@@ -186,6 +186,7 @@ div::-webkit-scrollbar-thumb {
 	height: 40px;
 	box-sizing: border-box;
 	padding: 10px;
+	cursor: pointer;
 }
 
 #controls .add-plot-button p {

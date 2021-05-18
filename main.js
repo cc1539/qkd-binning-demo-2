@@ -1,5 +1,23 @@
 
+var plotPalette;
+
 function setup() {
+	
+	plotPalette = [
+		color(255,0,0),
+		color(0,255,0),
+		color(0,0,255),
+		color(255,255,0),
+		color(255,0,255),
+		color(0,255,255),
+		color(255,128,0),
+		color(128,255,0),
+		color(0,255,128),
+		color(0,128,255),
+		color(128,0,255),
+		color(255,0,128)
+	];
+	
 	createCanvas(windowWidth,windowHeight);
 	$("#canvas").append($("#defaultCanvas0"));
 	
@@ -33,6 +51,7 @@ function setup() {
 	// PLOT CONTROLS ################################################
 	$(".plot-control").first().hide();
 	let addPlot = pc=>{
+		let plot = new Plot();
 		pc.show();
 		$("#controls .content").append(pc);
 		let titlebar = $(pc).find(".titlebar");
@@ -45,11 +64,55 @@ function setup() {
 		$(titlebar).find(".del").click(e=>{
 			e.stopPropagation();
 			$(titlebar).parent().remove();
+			for(let i=0;i<plots.length;i++) {
+			if(plots[i]==plot) {
+				plots.splice(i,1);
+				break;
+			}
+			}
 		});
 		$(titlebar).find(".dup").click(e=>{
 			e.stopPropagation();
 			addPlot($(titlebar).parent().clone());
 		});
+		
+		let color = plotPalette[floor(random(0,plotPalette.length))];
+		let hexcolor = "#"
+			+(color.levels[0].toString(16).padStart(2,'0'))
+			+(color.levels[1].toString(16).padStart(2,'0'))
+			+(color.levels[2].toString(16).padStart(2,'0'));
+		$(titlebar).find("input[type='color']").val(hexcolor);
+		$(titlebar).find("input[type='color']").on("input",function(){
+			plot.update({color:$(this).val()});
+		});
+		
+		"ndJaf".split('').forEach(e=>{
+			let inputs = $(pc).find("input[name='"+e+"']");
+			inputs.eq(1).val(inputs.eq(0).val());
+			inputs.on("input",function(){
+				inputs.val($(this).val());
+				let options = {};
+				options[e] = $(this).val();
+				plot.update(options);
+			});
+		});
+		$(pc).find("select[name='scheme']").on("change",function(){
+			plot.update({scheme:$(this).val()});
+		});
+		$(pc).find("select[name='sim']").on("change",function(){
+			plot.update({type:$(this).val()});
+		});
+		
+		plots.push(plot.update({
+			scheme: "sb",
+			type: "empirical",
+			color: $(titlebar).find("input[type='color']").val(),
+			n: 8,
+			d: 0,
+			J: 0.01,
+			a: 0.01,
+			f: 0.01
+		}));
 	};
 	$(".add-plot-button").click(()=>{
 		addPlot($(".plot-control").first().clone());
@@ -71,4 +134,7 @@ function draw() {
 	for(let i=0;i<height;i+=100) {
 		line(0,i,width,i);
 	}
+	
+	drawPlots();
 }
+
