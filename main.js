@@ -40,6 +40,7 @@ function setup() {
 	
 	createCanvas(windowWidth,windowHeight);
 	$("#canvas").append($("#defaultCanvas0"));
+	textFont("source code pro");
 	
 	// TOGGLES FOR INFO AND CONTROLS ################################
 	let setupToggle = (id,w)=>{
