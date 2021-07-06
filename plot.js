@@ -15,27 +15,37 @@ class Experiment {
 		this.a = options.a || .01;
 		this.f = options.f || .01;
 		
-		this.x_axis = options.x_axis || {vary:"p",minval:0,maxval:1};
-		this.p = options.p || 0;
-		this.x = this.p*(this.x_axis.maxval-this.x_axis.minval)+this.x_axis.minval;
+		this.x_axis = options.x_axis || {label:"p",minval:0,maxval:1};
+		this.p = plotAxes.x_axis.label=="p"?options.p:.1;
+		this.x = options.p*(this.x_axis.maxval-this.x_axis.minval)+this.x_axis.minval;
 		
 		this.bin = new BinningScheme();
 		this.bin.setSchemeType(binTypes[this.scheme]);
 		this.bin.setSchemeCount(1);
 		this.bin.setBinSize(1);
-		this.bin.setFrameSize(this.x_axis.vary=="n"?Math.ceil(x):this.n);
-		this.bin.setDeadTime(this.x_axis.vary=="d"?Math.ceil(x):this.d);
+		this.bin.setFrameSize(this.x_axis.label=="n"?Math.ceil(this.x):this.n);
+		this.bin.setDeadTime(this.x_axis.label=="d"?Math.ceil(this.x):this.d);
 	}
 	
 	get(options) {
 		let iterations = options.iterations;
 		let y_axis = options.y_axis;
 		for(let t=0;t<iterations;t++) {
-			let bit = Math.random()<(this.x_axis.vary=="p"?this.x:this.p);
+			let bit = Math.random()<(this.x_axis.label=="p"?this.x:this.p);
+			if(bit && Math.random()<this.a) {
+				bit = false;
+			}
+			if(!bit && Math.random()<this.f) {
+				bit = true;
+			}
 			this.bin.write(bit);
 		}
 		return this.bin.getRawKeyRate(); // todo: should depend on y_axis
 	}
+	
+}
+
+class MarkovChainAnalysis {
 	
 }
 
@@ -62,11 +72,7 @@ class Plot {
 					J: this.J,
 					a: this.a,
 					f: this.f,
-					x_axis: {
-						vary: "p",
-						minval: 0,
-						maxval: 1
-					},
+					x_axis: plotAxes.x_axis,
 					p: i/(this.out.length-1)
 				});
 			});
@@ -79,19 +85,19 @@ class Plot {
 	
 	refine() {
 		for(let i=0;i<this.out.length;i++) {
-			let p = i/(this.out.length-1);
-			if(this.type=="empirical") {
-				this.out[i] = this.samples[i].get({
-					iterations: 10,
-					y_axis: "R"
-				});
-			} else {
-				if(this.out[i]==null) {
-					this.out[i] = h(p,this.n)*(1-noise(i*.2+frameCount*.1)*.1);
-				}
-				this.out[i] = h(p,this.n)*(1-noise(i*.2+frameCount*.1)*.1);
+		if(this.type=="empirical") {
+			this.out[i] = this.samples[i].get({
+				iterations: 10,
+				y_axis: "R"
+			});
+		} else {
+			if(this.out[i]==null) {
+				let p = i/(this.out.length-1);
+				//this.out[i] = h(p,this.n)*(1-noise(i*.2+frameCount*.1)*.1);
+				this.out[i] = new MarkovChainAnalysis(
+				);
 			}
-			
+		}
 		}
 	}
 	

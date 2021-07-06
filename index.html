@@ -26,10 +26,37 @@
 		<div id="controls">
 			<button class="toggle">&#9881;&#65039;</button>
 			<div class="content">
+				
+				<div class="axis-controls" style="margin-top: 10px; padding: 10px;">
+			
+					<div class="param"><label>X Axis</label>
+					<select name="x_axis">
+						<option value="p">p (bin occupancy probability)</option>
+						<option value="d">d (down time)</option>
+						<option value="n">n (frame size in bins)</option>
+						<!--<option value="k">k (bin size in ps)</option>-->
+					</select></div><hr>
+					
+					<div class="param"><label>X Axis Minimum</label><input name="x_axis_min" type="text" autocomplete="off" value="0"></input></div><hr>
+					<div class="param"><label>X Axis Maximum</label><input name="x_axis_max" type="text" autocomplete="off" value="1"></input></div><hr>
+					
+					<div class="param"><label>Y Axis</label>
+					<select name="y_axis">
+						<option value="R">R (naiive key rate)</option>
+						<option value="Pe">Pe (normalized hamming distance)</option>
+						<option value="H">H (bit entropy/randomness)</option>
+						<option value="Rf">R' (estimated final key rate)</option>
+					</select></div><hr>
+					
+					<div class="param"><label>Y Axis Minimum</label><input name="y_axis_min" type="text" autocomplete="off" value="0"></input></div><hr>
+					<div class="param"><label>Y Axis Maximum</label><input name="y_axis_max" type="text" autocomplete="off" value="1"></input></div><hr>
+					
+				</div>
 				<div class="add-plot-button">
 					<p>Add New Plot</p>
 				</div>
 				<div class="plot-control">
+				
 					<div class="titlebar">
 						<input type="color"></input>
 						<p>Simple Binning</p>
@@ -62,7 +89,7 @@
 						<input type="range" step="0.01" name="a" min="0" max="1"></div><hr>
 						<div class="param"><label>P(Dark Count)</label><input name="f" type="text" autocomplete="off" value="0.01"></input>
 						<input type="range" step="0.01" name="f" min="0" max="1"></div><hr>
-						<button>Update Plot</button>
+						<!--<button>Update Plot</button>-->
 						<br><br>
 						
 						<div class="param"><label>Sample Sequence Length (in bits)</label><input name="sampleseq" type="text" autocomplete="off" value="65535"></input></div><hr>

@@ -8,6 +8,19 @@ var binTypes = {
 	"af": AdaptiveFraming.prototype
 }
 
+var plotAxes = {
+	x_axis: {
+		label: "p",
+		minval: 0,
+		maxval: 1
+	},
+	y_axis: {
+		label: "R",
+		minval: 0,
+		maxval: 1
+	}
+};
+
 function setup() {
 	
 	plotPalette = [
@@ -123,6 +136,27 @@ function setup() {
 	};
 	$(".add-plot-button").click(()=>{
 		addPlot($(".plot-control").first().clone());
+	});
+	
+	
+	// axis controls
+	$(".axis-controls select[name='x_axis']").on("change",function(){
+		plotAxes.x_axis.label = $(this).val();
+	});
+	$(".axis-controls input[name='x_axis_min']").on("change",function(){
+		plotAxes.x_axis.minval = $(this).val();
+	});
+	$(".axis-controls input[name='x_axis_max']").on("change",function(){
+		plotAxes.x_axis.maxval = $(this).val();
+	});
+	$(".axis-controls select[name='y_axis']").on("change",function(){
+		plotAxes.y_axis.label = $(this).val();
+	});
+	$(".axis-controls input[name='y_axis_min']").on("change",function(){
+		plotAxes.y_axis.minval = $(this).val();
+	});
+	$(".axis-controls input[name='y_axis_max']").on("change",function(){
+		plotAxes.y_axis.maxval = $(this).val();
 	});
 	
 }
