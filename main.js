@@ -1,6 +1,13 @@
 
 var plotPalette;
 
+var binTypes = {
+	"sb": SimpleBinning.prototype,
+	"ab": AdaptiveBinning.prototype,
+	"aab": AdaptiveAggregatedBinning.prototype,
+	"af": AdaptiveFraming.prototype
+}
+
 function setup() {
 	
 	plotPalette = [
