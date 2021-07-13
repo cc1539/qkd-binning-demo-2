@@ -27,15 +27,19 @@ function log2ceil(n) { // smallest integer m such that 2^m >= n, return 2^m
 }
 
 function fact(n) { // factorial
-	return 0; // todo
+	let out = 1;
+	for(let i=2;i<=n;i++) {
+		out *= i;
+	}
+	return out;
 }
 
 function perm(n) { // permutations
 	return 0; // todo
 }
 
-function comb(n) { // combinations
-	return 0; // todo
+function comb(n,k) { // combinations
+	return fact(n)/(fact(k)*fact(n-k));
 }
 
 function entropy(p, base) {
@@ -48,4 +52,8 @@ function entropy(p, base) {
 		sum += p[i]==0?0:(p[i]*Math.log(p[i]));
 	}
 	return -sum/Math.log(base);
+}
+
+function shuffleCount(a,b) {
+	return fact(a+b)/(fact(a)*fact(b));
 }

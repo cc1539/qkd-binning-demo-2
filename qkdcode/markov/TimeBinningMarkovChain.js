@@ -121,7 +121,7 @@ TimeBinningMarkovChain = class {
 		let totalRate = 0;
 		for(let i=0;i<this.stateArray.length;i++) {
 		if(this.stateArray[i].t.rate>0) {
-			let sequences = TimeBinningMarkovChain.generate(n,d,
+			let sequences = TimeBinningMarkovChain.generate(this.n,this.d,
 				this.stateArray[i].t,
 				this.stateArray[i].dl,
 				this.stateArray[i].dr);
@@ -132,7 +132,7 @@ TimeBinningMarkovChain = class {
 			let totalTo = 0;
 			for(let j=0;j<transitionRow.length;j++) {
 			if(transitionRow[j]>0 && this.stateArray[j].t.rate>0) {
-				let sequences0 = TimeBinningMarkovChain.generate(n,d,
+				let sequences0 = TimeBinningMarkovChain.generate(this.n,this.d,
 					this.stateArray[j].t,
 					this.stateArray[j].dl,
 					this.stateArray[j].dr);

@@ -9,14 +9,9 @@ class Experiment {
 	
 	constructor(options) {
 		
-		this.x_axis = options.x_axis || {label:"p",minval:0,maxval:1};
-		options[plotAxes.x_axis.label] = options.x*(this.x_axis.maxval-this.x_axis.minval)+this.x_axis.minval;
-		
-		//console.log(options);
-		
 		this.scheme = options.scheme || "sb";
-		this.n = options.n || 8;
-		this.d = options.d || 0;
+		this.n = Math.ceil(options.n || 8);
+		this.d = Math.ceil(options.d || 0);
 		this.p = options.p || 0;
 		this.J = options.J || .01;
 		this.a = options.a || .01;
@@ -43,16 +38,67 @@ class Experiment {
 			}
 			this.bin.write(bit);
 		}
-		return this.bin.getRawKeyRate(); // todo: should depend on y_axis
+		switch(plotAxes.y_axis.label) {
+			case "R": { return this.bin.getRawKeyRate(); }
+		}
+		
 	}
 	
 }
 
 class MarkovChainAnalysis {
 	
-	constructor(options) {
-		let tbmc = new TimeBinningMarkovChain(options.n,options.d,binTypes[options.scheme]);
+	static chains = [];
+	
+	static getChain = (n,d,scheme)=>{
 		
+		for(let i=0;i<MarkovChainAnalysis.chains.length;i++) {
+			let chain = MarkovChainAnalysis.chains[i];
+			if(chain.n==n && chain.d==d && chain.scheme==scheme) {
+				return chain;
+			}
+		}
+		
+		let tbmc = new TimeBinningMarkovChain(n,d,scheme);
+		tbmc.n = n;
+		tbmc.d = d;
+		tbmc.scheme = scheme;
+		MarkovChainAnalysis.chains.push(tbmc);
+		
+		let stateCount = tbmc.transitions.length;
+		console.log("the markov chain has "+stateCount+" states");
+		let noratestates = 0;
+		for(let i=0;i<stateCount;i++) {
+			if(tbmc.transitions[i].rate==0) {
+				noratestates++;
+			}
+		}
+		console.log("..."+noratestates+" of which do not give any key bits.");
+		console.log("a speed-up of ~"+round(pow(stateCount/(stateCount-noratestates),2))+"x is in order");
+		
+		return tbmc;
+	}
+	
+	constructor(options) {
+		this.scheme = options.scheme || "sb";
+		this.n = Math.ceil(options.n);
+		this.d = Math.ceil(options.d);
+		this.p = options.p;
+		this.J = options.J;
+		this.a = options.a;
+		this.f = options.f;
+		
+		this.tbmc = MarkovChainAnalysis.getChain(this.n,this.d,binTypes[this.scheme]);
+	}
+	
+	get() {
+		let p = this.p*(1-this.a)+(1-this.p)*this.f;
+		let limit = this.tbmc.transition(p);
+		let state = this.tbmc.stationaryFromMatrix(0,limit);
+		switch(plotAxes.y_axis.label) {
+			case "H": { return this.tbmc.entropyFromMatrix(limit,state,true); }
+			case "R": { return this.tbmc.keyrateFromState(state); }
+		}
 	}
 	
 }
@@ -60,6 +106,7 @@ class MarkovChainAnalysis {
 class Plot {
 	
 	update(options) {
+		/*
 		this.scheme = options.scheme || this.scheme;
 		this.type   = options.type   || this.type;
 		this.color  = options.color  || this.color;
@@ -69,11 +116,18 @@ class Plot {
 		this.J = options.J | this.J;
 		this.a = options.a | this.a;
 		this.f = options.f | this.f;
+		*/
+		["scheme","type","color"].concat("ndpJaf".split('')).forEach(e=>{
+			if(options[e]!=null) {
+				this[e] = options[e];
+			}
+		});
 		
 		$(this.controls).find(".titlebar p:nth-child(2)").text(
 			$(this.controls).find("select[name='scheme'] option[value='"+this.scheme+"']").text());
 		
 		this.refresh();
+		
 		return this;
 	}
 	
@@ -88,6 +142,7 @@ class Plot {
 		"ndpJaf".split('').forEach(e=>{
 			$(this.controls).find("input[name='"+e+"']").val(this[e]);
 		});
+		
 	}
 	
 	refresh() {
@@ -96,26 +151,31 @@ class Plot {
 		
 		if(this.type=="empirical") {
 			this.samples = new Array(this.out.length).fill(0).map((e,i)=>{
-				return new Experiment({
+				
+				let options = {
 					scheme: this.scheme,
-					type: this.type,
 					n: this.n,
 					d: this.d,
 					p: this.p,
 					J: this.J,
 					a: this.a,
 					f: this.f,
-					x_axis: plotAxes.x_axis,
 					x: i/(this.out.length-1)
-				});
+				};
+				
+				options[plotAxes.x_axis.label] = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,options.x);
+				
+				return new Experiment(options);
 			});
 		} else {
 			this.samples = null;
+			this.out.fill(null);
 		}
 		
 	}
 	
 	refine() {
+		let startTime = millis();
 		for(let i=0;i<this.out.length;i++) {
 		if(this.type=="empirical") {
 			this.out[i] = this.samples[i].get({
@@ -124,9 +184,26 @@ class Plot {
 			});
 		} else {
 			if(this.out[i]==null) {
-				let p = i/(this.out.length-1);
-				//this.out[i] = h(p,this.n)*(1-noise(i*.2+frameCount*.1)*.1);
-				this.out[i] = new MarkovChainAnalysis(this);
+				
+				let options = {
+					scheme: this.scheme,
+					n: this.n,
+					d: this.d,
+					p: this.p,
+					J: this.J,
+					a: this.a,
+					f: this.f,
+					x: i/(this.out.length-1)
+				};
+				
+				options[plotAxes.x_axis.label] = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,options.x);
+				
+				this.out[i] = new MarkovChainAnalysis(options).get();
+				
+				let elapsedTime = (millis()-startTime); // in milliseconds
+				if(elapsedTime>20) {
+					break;
+				}
 			}
 		}
 		}
