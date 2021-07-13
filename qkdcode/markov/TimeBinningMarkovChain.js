@@ -41,15 +41,6 @@ TimeBinningMarkovChain = class {
 				}
 			}
 		}
-		/*
-		for(let i=0;i<this.matrix.length;i++) {
-		for(let j=0;j<this.matrix[0].length;j++) {
-		if(this.matrix[i][j]==null) {
-			console.log(i+","+j);
-		}
-		}
-		}
-		*/
 	}
 	
 	transition(p) {
@@ -162,12 +153,8 @@ TimeBinningMarkovChain = class {
 				for(let key in tranto) {
 					let q = tranto[key]/totalTo;
 					subentropy += (q>0&&q<1)?(-q*log(q)):0;
-					//console.log(key+": "+q);
 				}
-				//console.log("entropy: "+subentropy);
 				subentropy *= rate/log(Object.keys(tranto).length);
-				//console.log("rate entropy: "+subentropy);
-				//console.log();
 			} else {
 				subentropy = 0;
 			}
