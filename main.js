@@ -72,7 +72,10 @@ function setup() {
 	// PLOT CONTROLS ################################################
 	$(".plot-control").first().hide();
 	let addPlot = pc=>{
+		
 		let plot = new Plot();
+		plot.controls = pc;
+		
 		pc.show();
 		$("#controls .content").append(pc);
 		let titlebar = $(pc).find(".titlebar");
@@ -107,7 +110,7 @@ function setup() {
 			plot.update({color:$(this).val()});
 		});
 		
-		"ndJaf".split('').forEach(e=>{
+		"ndpJaf".split('').forEach(e=>{
 			let inputs = $(pc).find("input[name='"+e+"']");
 			inputs.eq(1).val(inputs.eq(0).val());
 			inputs.on("input",function(){
@@ -130,34 +133,65 @@ function setup() {
 			color: $(titlebar).find("input[type='color']").val(),
 			n: 8,
 			d: 0,
-			J: 0.01,
-			a: 0.01,
-			f: 0.01
+			p: 0.01,
+			J: 0,
+			a: 0,
+			f: 0
 		}));
+		
+		return plot;
 	};
+	
 	$(".add-plot-button").click(()=>{
 		addPlot($(".plot-control").first().clone());
 	});
+	
+	addPlot($(".plot-control").first().clone()).update({
+		scheme: "sb",
+		type: "empirical",
+		color: "#0000FF"
+	}).updateControls();
+	addPlot($(".plot-control").first().clone()).update({
+		scheme: "ab",
+		type: "empirical",
+		color: "#FF0000"
+	}).updateControls();
+	addPlot($(".plot-control").first().clone()).update({
+		scheme: "aab",
+		type: "empirical",
+		color: "#FFFF00"
+	}).updateControls();
+	addPlot($(".plot-control").first().clone()).update({
+		scheme: "af",
+		type: "empirical",
+		color: "#FF00FF"
+	}).updateControls();
 	
 	
 	// axis controls
 	$(".axis-controls select[name='x_axis']").on("change",function(){
 		plotAxes.x_axis.label = $(this).val();
+		plots.forEach(e=>e.refresh());
 	});
 	$(".axis-controls input[name='x_axis_min']").on("change",function(){
 		plotAxes.x_axis.minval = $(this).val();
+		plots.forEach(e=>e.refresh());
 	});
 	$(".axis-controls input[name='x_axis_max']").on("change",function(){
 		plotAxes.x_axis.maxval = $(this).val();
+		plots.forEach(e=>e.refresh());
 	});
 	$(".axis-controls select[name='y_axis']").on("change",function(){
 		plotAxes.y_axis.label = $(this).val();
+		plots.forEach(e=>e.refresh());
 	});
 	$(".axis-controls input[name='y_axis_min']").on("change",function(){
 		plotAxes.y_axis.minval = $(this).val();
+		plots.forEach(e=>e.refresh());
 	});
 	$(".axis-controls input[name='y_axis_max']").on("change",function(){
 		plotAxes.y_axis.maxval = $(this).val();
+		plots.forEach(e=>e.refresh());
 	});
 	
 }

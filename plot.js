@@ -8,30 +8,33 @@ function h(p,t) {
 class Experiment {
 	
 	constructor(options) {
+		
+		this.x_axis = options.x_axis || {label:"p",minval:0,maxval:1};
+		options[plotAxes.x_axis.label] = options.x*(this.x_axis.maxval-this.x_axis.minval)+this.x_axis.minval;
+		
+		//console.log(options);
+		
 		this.scheme = options.scheme || "sb";
 		this.n = options.n || 8;
 		this.d = options.d || 0;
+		this.p = options.p || 0;
 		this.J = options.J || .01;
 		this.a = options.a || .01;
 		this.f = options.f || .01;
-		
-		this.x_axis = options.x_axis || {label:"p",minval:0,maxval:1};
-		this.p = plotAxes.x_axis.label=="p"?options.p:.1;
-		this.x = options.p*(this.x_axis.maxval-this.x_axis.minval)+this.x_axis.minval;
 		
 		this.bin = new BinningScheme();
 		this.bin.setSchemeType(binTypes[this.scheme]);
 		this.bin.setSchemeCount(1);
 		this.bin.setBinSize(1);
-		this.bin.setFrameSize(this.x_axis.label=="n"?Math.ceil(this.x):this.n);
-		this.bin.setDeadTime(this.x_axis.label=="d"?Math.ceil(this.x):this.d);
+		this.bin.setFrameSize(this.n);
+		this.bin.setDeadTime(this.d);
 	}
 	
 	get(options) {
 		let iterations = options.iterations;
 		let y_axis = options.y_axis;
 		for(let t=0;t<iterations;t++) {
-			let bit = Math.random()<(this.x_axis.label=="p"?this.x:this.p);
+			let bit = Math.random()<this.p;
 			if(bit && Math.random()<this.a) {
 				bit = false;
 			}
@@ -47,6 +50,11 @@ class Experiment {
 
 class MarkovChainAnalysis {
 	
+	constructor(options) {
+		let tbmc = new TimeBinningMarkovChain(options.n,options.d,binTypes[options.scheme]);
+		
+	}
+	
 }
 
 class Plot {
@@ -55,11 +63,35 @@ class Plot {
 		this.scheme = options.scheme || this.scheme;
 		this.type   = options.type   || this.type;
 		this.color  = options.color  || this.color;
-		this.n = options.n || this.n;
-		this.d = options.d || this.d;
-		this.J = options.J || this.J;
-		this.a = options.a || this.a;
-		this.f = options.f || this.f;
+		this.n = options.n | this.n;
+		this.d = options.d | this.d;
+		this.p = options.p | this.p;
+		this.J = options.J | this.J;
+		this.a = options.a | this.a;
+		this.f = options.f | this.f;
+		
+		$(this.controls).find(".titlebar p:nth-child(2)").text(
+			$(this.controls).find("select[name='scheme'] option[value='"+this.scheme+"']").text());
+		
+		this.refresh();
+		return this;
+	}
+	
+	updateControls() {
+		
+		$(this.controls).find(".titlebar p:nth-child(2)").text(
+			$(this.controls).find("select[name='scheme'] option[value='"+this.scheme+"']").text());
+		
+		$(this.controls).find("select[name='scheme']").val(this.scheme);
+		$(this.controls).find("select[name='sim']").val(this.type);
+		$(this.controls).find("input[type='color']").val(this.color);
+		"ndpJaf".split('').forEach(e=>{
+			$(this.controls).find("input[name='"+e+"']").val(this[e]);
+		});
+	}
+	
+	refresh() {
+		
 		this.out = new Array(1000).fill(0);
 		
 		if(this.type=="empirical") {
@@ -69,18 +101,18 @@ class Plot {
 					type: this.type,
 					n: this.n,
 					d: this.d,
+					p: this.p,
 					J: this.J,
 					a: this.a,
 					f: this.f,
 					x_axis: plotAxes.x_axis,
-					p: i/(this.out.length-1)
+					x: i/(this.out.length-1)
 				});
 			});
 		} else {
 			this.samples = null;
 		}
 		
-		return this;
 	}
 	
 	refine() {
@@ -94,8 +126,7 @@ class Plot {
 			if(this.out[i]==null) {
 				let p = i/(this.out.length-1);
 				//this.out[i] = h(p,this.n)*(1-noise(i*.2+frameCount*.1)*.1);
-				this.out[i] = new MarkovChainAnalysis(
-				);
+				this.out[i] = new MarkovChainAnalysis(this);
 			}
 		}
 		}
@@ -179,6 +210,20 @@ function drawGridFrame(options) {
 	
 }
 
+function drawAxes(options) {
+	fill(255);
+	stroke(0);
+	
+	textAlign(CENTER,TOP);
+	text($("select[name='x_axis'] option:selected").text(),options.x+options.w/2,options.y+options.h+40);
+	push();
+	textAlign(CENTER,BOTTOM);
+	translate(options.x-60,options.y+options.h/2);
+	rotate(-HALF_PI);
+	text($("select[name='y_axis'] option:selected").text(),0,0);
+	pop();
+}
+
 function drawPlots() {
 	let windowWidth = width;
 	let plotX = 0;
@@ -198,6 +243,7 @@ function drawPlots() {
 		h: plotHeight
 	};
 	drawGridFrame(frame);
+	drawAxes(frame);
 	for(let plot of plots) {
 		plot.refine();
 		plot.draw(frame);

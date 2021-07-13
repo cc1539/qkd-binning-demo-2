@@ -34,6 +34,9 @@
 						<option value="p">p (bin occupancy probability)</option>
 						<option value="d">d (down time)</option>
 						<option value="n">n (frame size in bins)</option>
+						<option value="J">jitter</option>
+						<option value="a">absorption</option>
+						<option value="f">dark counts</option>
 						<!--<option value="k">k (bin size in ps)</option>-->
 					</select></div><hr>
 					
@@ -82,12 +85,14 @@
 						<div class="param"><label>Frame Size</label><input name="n" type="text" autocomplete="off" value="8"></input>
 						<input type="range" step="1" name="n" min="0" max="32"></div><hr>
 						<div class="param"><label>Recovery time</label><input name="d" type="text" autocomplete="off" value="0"></input>
-						<input type="range" step="1" name="d" min="0" max="256"></div><hr>
-						<div class="param"><label>P(Jitter)</label><input name="J" type="text" autocomplete="off" value="0.01"></input>
+						<input type="range" step="1" name="d" min="0" max="128"></div><hr>
+						<div class="param"><label>P(occupancy)</label><input name="p" type="text" autocomplete="off" value="0.01"></input>
+						<input type="range" step="0.01" name="p" min="0" max="1"></div><hr>
+						<div class="param"><label>P(Jitter)</label><input name="J" type="text" autocomplete="off" value="0"></input>
 						<input type="range" step="0.01" name="J" min="0" max="1"></div><hr>
-						<div class="param"><label>P(Absorption)</label><input name="a" type="text" autocomplete="off" value="0.01"></input>
+						<div class="param"><label>P(Absorption)</label><input name="a" type="text" autocomplete="off" value="0"></input>
 						<input type="range" step="0.01" name="a" min="0" max="1"></div><hr>
-						<div class="param"><label>P(Dark Count)</label><input name="f" type="text" autocomplete="off" value="0.01"></input>
+						<div class="param"><label>P(Dark Count)</label><input name="f" type="text" autocomplete="off" value="0"></input>
 						<input type="range" step="0.01" name="f" min="0" max="1"></div><hr>
 						<!--<button>Update Plot</button>-->
 						<br><br>
