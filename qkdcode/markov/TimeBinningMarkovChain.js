@@ -138,7 +138,7 @@ TimeBinningMarkovChain = class {
 					this.stateArray[j].dr);
 				let speed = transitionRow[j]/sequences0.length;
 				for(let keyInput of sequences0) {
-					let key = scheme.apply(keyInput);
+					let key = this.scheme.apply(keyInput);
 					if(tranto[key]!=null) {
 						tranto[key] += speed;
 					} else {
@@ -159,7 +159,7 @@ TimeBinningMarkovChain = class {
 				subentropy = 0;
 			}
 			for(let keyInput of sequences) {
-				let key = scheme.apply(keyInput);
+				let key = this.scheme.apply(keyInput);
 				if(keyRate[key]!=null) {
 					keyRate[key] = keyRate[key]+rate;
 					entropy[key] = entropy[key]+subentropy;

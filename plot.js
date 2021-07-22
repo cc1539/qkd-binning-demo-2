@@ -9,13 +9,13 @@ class Experiment {
 	
 	constructor(options) {
 		
-		this.scheme = options.scheme || "sb";
-		this.n = Math.ceil(options.n || 8);
-		this.d = Math.ceil(options.d || 0);
-		this.p = options.p || 0;
-		this.J = options.J || .01;
-		this.a = options.a || .01;
-		this.f = options.f || .01;
+		this.scheme = options.scheme; // as text
+		this.n = Math.ceil(options.n);
+		this.d = Math.ceil(options.d);
+		this.p = options.p;
+		this.J = options.J;
+		this.a = options.a;
+		this.f = options.f;
 		
 		this.bin = new BinningScheme();
 		this.bin.setSchemeType(binTypes[this.scheme]);
@@ -40,6 +40,15 @@ class Experiment {
 		}
 		switch(plotAxes.y_axis.label) {
 			case "R": { return this.bin.getRawKeyRate(); }
+			case "H": {
+				return Math.random();
+			}
+			case "Pe": { // probability of error
+				return Math.random();
+			}
+			case "Rf": { // final rate
+				return Math.random();
+			}
 		}
 		
 	}
@@ -80,7 +89,7 @@ class MarkovChainAnalysis {
 	}
 	
 	constructor(options) {
-		this.scheme = options.scheme || "sb";
+		this.scheme = options.scheme;
 		this.n = Math.ceil(options.n);
 		this.d = Math.ceil(options.d);
 		this.p = options.p;
@@ -106,17 +115,7 @@ class MarkovChainAnalysis {
 class Plot {
 	
 	update(options) {
-		/*
-		this.scheme = options.scheme || this.scheme;
-		this.type   = options.type   || this.type;
-		this.color  = options.color  || this.color;
-		this.n = options.n | this.n;
-		this.d = options.d | this.d;
-		this.p = options.p | this.p;
-		this.J = options.J | this.J;
-		this.a = options.a | this.a;
-		this.f = options.f | this.f;
-		*/
+		
 		["scheme","type","color"].concat("ndpJaf".split('')).forEach(e=>{
 			if(options[e]!=null) {
 				this[e] = options[e];
@@ -245,7 +244,8 @@ function drawGridFrame(options) {
 		fill(255);
 		noStroke();
 		textAlign(CENTER,TOP);
-		let num = ((i+1)/xlines).toLocaleString('en-EN',{
+		let coord = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,(i+1)/xlines);
+		let num = coord.toLocaleString('en-EN',{
 			minimumFractionDigits:2,
 			maximumFractionDigits:2});
 		text(num,options.x+offset-3,options.y+options.h+15);
@@ -268,7 +268,8 @@ function drawGridFrame(options) {
 		fill(255);
 		noStroke();
 		textAlign(RIGHT,CENTER);
-		let num = (1-i/ylines).toLocaleString('en-EN',{
+		let coord = lerp(plotAxes.y_axis.minval,plotAxes.y_axis.maxval,1-i/ylines);
+		let num = coord.toLocaleString('en-EN',{
 			minimumFractionDigits:2,
 			maximumFractionDigits:2});
 		text(num,options.x-15,options.y+offset+1)
