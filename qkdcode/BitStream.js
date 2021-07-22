@@ -15,7 +15,7 @@ class BitStream {
 	
 	read() {
 		if(!this.ready()) {
-			return false;
+			return undefined;
 		}
 		let bit = this.memory[0];
 		this.readIndex++;

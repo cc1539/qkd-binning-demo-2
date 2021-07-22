@@ -67,7 +67,7 @@ function setup() {
 	};
 	
 	setupToggle("info",500);
-	setupToggle("controls",350);
+	setupToggle("controls",360);
 	
 	// PLOT CONTROLS ################################################
 	$(".plot-control").first().hide();
@@ -110,7 +110,7 @@ function setup() {
 			plot.update({color:$(this).val()});
 		});
 		
-		"ndpJaf".split('').forEach(e=>{
+		"ndpJafBS".split('').forEach(e=>{
 			let inputs = $(pc).find("input[name='"+e+"']");
 			inputs.eq(1).val(inputs.eq(0).val());
 			inputs.on("input",function(){
@@ -126,6 +126,9 @@ function setup() {
 		$(pc).find("select[name='sim']").on("change",function(){
 			plot.update({type:$(this).val()});
 		});
+		$(pc).find("select[name='ec']").on("change",function(){
+			plot.update({errorc:$(this).val()});
+		});
 		
 		plots.push(plot.update({
 			scheme: "sb",
@@ -136,7 +139,9 @@ function setup() {
 			p: 0.01,
 			J: 0,
 			a: 0,
-			f: 0
+			f: 0,
+			B: 8,
+			S: 1
 		}));
 		
 		return plot;

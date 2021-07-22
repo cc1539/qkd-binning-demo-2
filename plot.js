@@ -7,6 +7,184 @@ function h(p,t) {
 
 class Experiment {
 	
+	// put this in a better place later
+	static JitterChannel = class {
+		
+		constructor(J) {
+			this.queue = [];
+			this.J = J;
+		}
+		
+		put(bit) {
+			if(bit) {
+				this.queue.push(1+(Math.random()<this.J?(Math.random()<.5?1:-1):0));
+			}
+		}
+		
+		get() {
+			let out = false;
+			for(let i=this.queue.length-1;i>=0;i--) {
+				if(this.queue[i]==0) {
+					out = true;
+					this.queue.splice(i,1);
+				} else {
+					this.queue[i]--;
+				}
+			}
+			return out;
+		}
+		
+	}
+	
+	static ErrorCorrectionChannel = class {
+		
+		constructor(type,blockSize,symbolSize) {
+			
+			this.type = type;
+			
+			this.blockSize = this.blockSize | blockSize;
+			this.symbolSize = this.symbolSize | symbolSize;
+			this.queueSize = blockSize*symbolSize;
+			
+			this.queueA = [];
+			this.queueB = [];
+			
+			this.outputA = [];
+			this.outputB = [];
+			
+			this.leaked = [];
+		}
+		
+		putA(bit) {
+			this.queueA.push(bit);
+		}
+		
+		putB(bit) {
+			this.queueB.push(bit);
+		}
+		
+		ready() {
+			return (this.queueA.length>=this.queueSize);
+		}
+		
+		replaceUndefined() {
+			this.queueA = this.queueA.map(e=>e==undefined?false:e);
+			this.queueB = this.queueB.map(e=>e==undefined?false:e);
+		}
+		
+		hasUndefined() {
+			for(let i=0;i<this.queueA.length;i++) {
+			if(this.queueA[i]==undefined) {
+				return true;
+			}
+			}
+			for(let i=0;i<this.queueB.length;i++) {
+			if(this.queueB[i]==undefined) {
+				return true;
+			}
+			}
+		}
+		
+		process() {
+			if(ready()) {
+				this.outputA = this.queueA; // channel a is unchanged
+				
+				switch(this.type) {
+					case "hamming":
+						
+						// fix single bit flip
+						this.replaceUndefined();
+						let parity_a = this.queueA.map((e,i)=>e?i:0).reduce((a,b)=>a^b);
+						let parity_b = this.queueB.map((e,i)=>e?i:0).reduce((a,b)=>a^b);
+						let error_location = parity_b^parity_a;
+						this.queueB[error_location] ^= true;
+						this.outputB = this.queueB.splice(0,this.queueB.length);
+						
+					break;
+					case "jitter":
+						
+						// fix jitters of one unit
+						if(this.hasUndefined()) {
+							this.outputA = [];
+							this.outputB = [];
+						} else {
+							let a = bin2int(this.queueA);
+							let b = bin2int(this.queueB);
+							while(Math.abs(a-b)>1) {
+								if(a<b) {
+									a += 2;
+								} else {
+									a -= 2;
+								}
+							}
+							for(let i=0;i<this.queueB.length;i++) {
+								this.outputB[i] = (a&(1<<i))!=0;
+							}
+						}
+						
+					break;
+					case "ldpc":
+						
+						// assume 5% of bit flips are fixed
+						// assume 30% of erasures are fixed
+						for(let i=0;i<this.queueA.length;i++) {
+							if(this.queueA[i]!=this.queueB[i]) {
+								let correction_probability = 0.05;
+								if(this.queueA[i]==undefined || this.queueB[i]==undefined) {
+									correction_probability = 0.3;
+								}
+								if(Math.random()>correction_probability) {
+									this.outputB[i] = !this.queueA[i];
+								} else {
+									this.outputB[i] = this.queueA[i];
+								}
+							} else {
+								this.outputB[i] = this.queueA[i];
+							}
+						}
+						
+					break;
+					case "rs":
+						let errors = 0;
+						for(let i=0;i<this.queueSize;i+=this.symbolSize) {
+							let errored = false;
+							for(let j=0;j<this.symbolSize;j++) {
+							if(this.queueA[i+j]!=this.queueB[i+j]) {
+								errored = true;
+								break;
+							}
+							}
+							if(errored) {
+								errors++;
+								if(errors>this.blockSize/2) {
+									break;
+								}
+							}
+						}
+						if(errors>this.blockSize/2) {
+							
+							// for now, assume complete error
+							for(let i=0;i<this.queueA.length;i++) {
+								this.output[i] = !this.queueA[i];
+							}
+							
+						} else {
+							
+							// assume complete correction
+							for(let i=0;i<this.queueA.length;i++) {
+								this.output[i] = this.queueA[i];
+							}
+							
+						}
+					break;
+				}
+				this.queueA = [];
+				this.queueB = [];
+			}
+		}
+		
+	}
+	
 	constructor(options) {
 		
 		this.scheme = options.scheme; // as text
@@ -17,34 +195,151 @@ class Experiment {
 		this.a = options.a;
 		this.f = options.f;
 		
-		this.bin = new BinningScheme();
-		this.bin.setSchemeType(binTypes[this.scheme]);
-		this.bin.setSchemeCount(1);
-		this.bin.setBinSize(1);
-		this.bin.setFrameSize(this.n);
-		this.bin.setDeadTime(this.d);
+		// error correction
+		this.errorc = options.errorc;
+		this.blockSize = options.B;
+		this.symbolSize = options.S;
+		
+		// bins
+		this.bin_a = new BinningScheme();
+		this.bin_a.setSchemeType(binTypes[this.scheme]);
+		this.bin_a.setSchemeCount(1);
+		this.bin_a.setBinSize(1);
+		this.bin_a.setFrameSize(this.n);
+		this.bin_a.setDeadTime(this.d);
+		this.bin_a.getAnalysis().setLetterSize(1<<this.n);
+		
+		this.bin_b = new BinningScheme();
+		this.bin_b.setSchemeType(binTypes[this.scheme]);
+		this.bin_b.setSchemeCount(1);
+		this.bin_b.setBinSize(1);
+		this.bin_b.setFrameSize(this.n);
+		this.bin_b.setDeadTime(this.d);
+		this.bin_b.getAnalysis().setLetterSize(1<<this.n);
+		
+		this.errors = 0;
+		this.counts = 0;
 	}
 	
 	get(options) {
+		
+		let jitter = this.J;
+		/*
+		if(this.errorc=="jitter") {
+			jitter = 0;
+		}
+		*/
+		let channel_a = new Experiment.JitterChannel(jitter);
+		let channel_b = new Experiment.JitterChannel(jitter);
+		
+		let ec_channel = new Experiment.ErrorCorrectionChannel(this.errorc,this.B,this.S);
+		
+		// flush out the jitter channel
+		for(let t=0;t<3;t++) {
+			
+			let bit = Math.random()<this.p;
+			
+			let bit_a = bit;
+			if(bit_a && Math.random()<this.a) {
+				bit_a = false;
+			}
+			if(!bit_a && Math.random()<this.f) {
+				bit_a = true;
+			}
+			
+			let bit_b = bit;
+			if(bit_b && Math.random()<this.a) {
+				bit_b = false;
+			}
+			if(!bit_b && Math.random()<this.f) {
+				bit_b = true;
+			}
+			
+			channel_a.put(bit_a);
+			channel_b.put(bit_b);
+			
+			bit_a = channel_a.get();
+			bit_b = channel_b.get();
+			
+		}
+		
 		let iterations = options.iterations;
 		let y_axis = options.y_axis;
 		for(let t=0;t<iterations;t++) {
+			
 			let bit = Math.random()<this.p;
-			if(bit && Math.random()<this.a) {
-				bit = false;
+			
+			if(this.a==0 && this.f==0 && this.J==0) {
+				// no errors
+				
+				this.bin_a.write(bit);
+				this.counts = 1;
+				
+				continue;
 			}
-			if(!bit && Math.random()<this.f) {
-				bit = true;
+			
+			let bit_a = bit;
+			if(bit_a && Math.random()<this.a) {
+				bit_a = false;
 			}
-			this.bin.write(bit);
+			if(!bit_a && Math.random()<this.f) {
+				bit_a = true;
+			}
+			
+			let bit_b = bit;
+			if(bit_b && Math.random()<this.a) {
+				bit_b = false;
+			}
+			if(!bit_b && Math.random()<this.f) {
+				bit_b = true;
+			}
+			
+			channel_a.put(bit_a);
+			channel_b.put(bit_b);
+			
+			bit_a = channel_a.get();
+			bit_b = channel_b.get();
+			
+			this.bin_a.write(bit_a);
+			this.bin_b.write(bit_b);
+			
+			while(this.bin_a.output.ready() || this.bin_b.output.ready()) {
+				let out_a = this.bin_a.output.read();
+				let out_b = this.bin_b.output.read();
+				
+				ec_channel.putA(out_a);
+				ec_channel.putB(out_b);
+				/*
+				if(ec_channel.ready()) {
+					ec_channel.process();
+					for(let i=0;i<ec_channel.outputA.length;i++) {
+						let out_a = ec_channel.outputA[i];
+						let out_b = ec_channel.outputB[i];
+						if(out_a!=out_b) {
+							this.errors++;
+							this.bin_a.getAnalysis().counts--;
+						}
+						this.counts++;
+					}
+				}
+				*/
+				if(out_a!=out_b) {
+					this.errors++;
+					this.bin_a.getAnalysis().counts--;
+				}
+				this.counts++;
+				
+			}
+			
 		}
 		switch(plotAxes.y_axis.label) {
-			case "R": { return this.bin.getRawKeyRate(); }
+			case "R": { return this.bin_a.getRawKeyRate(); }
 			case "H": {
-				return Math.random();
+				return this.bin_a.getAnalysis().getMarkovChainEntropy();
+				//return this.bin.getAnalysis().getRandomness();
 			}
 			case "Pe": { // probability of error
-				return Math.random();
+				return this.errors/this.counts;
 			}
 			case "Rf": { // final rate
 				return Math.random();
@@ -116,7 +411,7 @@ class Plot {
 	
 	update(options) {
 		
-		["scheme","type","color"].concat("ndpJaf".split('')).forEach(e=>{
+		["scheme","type","errorc","color"].concat("ndpJafBS".split('')).forEach(e=>{
 			if(options[e]!=null) {
 				this[e] = options[e];
 			}
@@ -137,8 +432,9 @@ class Plot {
 		
 		$(this.controls).find("select[name='scheme']").val(this.scheme);
 		$(this.controls).find("select[name='sim']").val(this.type);
+		$(this.controls).find("select[name='errorc']").val(this.type);
 		$(this.controls).find("input[type='color']").val(this.color);
-		"ndpJaf".split('').forEach(e=>{
+		"ndpJafBS".split('').forEach(e=>{
 			$(this.controls).find("input[name='"+e+"']").val(this[e]);
 		});
 		
@@ -153,12 +449,15 @@ class Plot {
 				
 				let options = {
 					scheme: this.scheme,
+					errorc: this.errorc,
 					n: this.n,
 					d: this.d,
 					p: this.p,
 					J: this.J,
 					a: this.a,
 					f: this.f,
+					B: this.B,
+					S: this.S,
 					x: i/(this.out.length-1)
 				};
 				

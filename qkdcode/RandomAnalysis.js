@@ -1,6 +1,62 @@
 
 class RandomAnalysis extends BitStream {
 	
+	static MarkovChain = class {
+		
+		constructor() {
+			this.states = [];
+			this.weight = [];
+			this.last_state = null;
+			this.counts++;
+		}
+		
+		addState(symbol) {
+			let state = {};
+			state.symbol = symbol;
+			state.counts = 0;
+			state.index = this.states.length;
+			this.states.push(state);
+			this.weight.push(new Array(this.states.length).fill(0));
+			for(let i=0;i<this.states.length-1;i++) {
+				this.weight[i][this.states.length-1] = 0;
+			}
+			return state;
+		}
+		
+		getState(symbol) {
+			for(let i=0;i<this.states.length;i++) {
+			if(this.states[i].symbol==symbol) {
+				return this.states[i];
+			}
+			}
+			return null;
+		}
+		
+		record(symbol) {
+			let state = this.getState(symbol);
+			if(state==null) {
+				state = this.addState(symbol);
+			}
+			state.counts++;
+			if(this.last_state!=null) {
+				this.weight[this.last_state.index][state.index]++;
+			}
+			this.last_state = state;
+			this.counts++;
+		}
+		
+		entropy() {
+			let ent = 0;
+			for(let i=0;i<this.states.length;i++) {
+				let p = this.states[i].counts/this.counts;
+				let totalWeight = this.weight[i].reduce((a,b)=>a+b);
+				ent += p*entropy(this.weight[i].map(e=>e/totalWeight),this.states.length);
+			}
+			return ent/Math.log(this.states.length);
+		}
+		
+	}
+	
 	constructor() {
 		super();
 		
@@ -11,11 +67,14 @@ class RandomAnalysis extends BitStream {
 		this.counts = 0;
 		this.edges = 0;
 		this.samples = 0;
+		
+		this.markovchain = new RandomAnalysis.MarkovChain();
 	}
 	
 	setLetterSize(value) {
 		this.letterSize = value;
 		this.bins = Array(1<<value).fill(0); // 2^value
+		this.markovchain = new RandomAnalysis.MarkovChain();
 	}
 	
 	write(bit) {
@@ -32,7 +91,9 @@ class RandomAnalysis extends BitStream {
 		this.samples++;
 		
 		if(this.length()>=this.letterSize) {
-			this.bins[this.readInt(this.letterSize)]++;
+			let symbol = this.readInt(this.letterSize);
+			this.markovchain.record(symbol);
+			this.bins[symbol]++;
 		}
 		
 	}
@@ -78,6 +139,10 @@ class RandomAnalysis extends BitStream {
 	
 	getRandomness() {
 		return this.getStatisticalRandomness()*this.getStructuralRandomness()*this.getSymbolicMinEntropy();
+	}
+	
+	getMarkovChainEntropy() {
+		return this.markovchain.entropy();
 	}
 	
 }

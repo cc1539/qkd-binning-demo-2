@@ -82,6 +82,18 @@
 							<option value="analytical">Analytical</option>
 						</select></div><hr>
 						
+						<div class="param"><label>Error Correction</label>
+						<select name="ec">
+							<option value="hamming">Hamming</option>
+							<option value="jitter">Jitter*</option>
+							<option value="ldpc">LDPC</option>
+							<option value="rs">Reed-Solomon</option>
+						</select></div><hr>
+						<div class="param"><label>Block Size</label><input name="B" type="text" autocomplete="off" value="8"></input>
+						<input type="range" step="1" name="B" min="0" max="32"></div><hr>
+						<div class="param"><label>Symbol Size</label><input name="S" type="text" autocomplete="off" value="8"></input>
+						<input type="range" step="1" name="S" min="0" max="32"></div><hr>
+						
 						<div class="param"><label>Frame Size</label><input name="n" type="text" autocomplete="off" value="8"></input>
 						<input type="range" step="1" name="n" min="0" max="32"></div><hr>
 						<div class="param"><label>Recovery time</label><input name="d" type="text" autocomplete="off" value="0"></input>

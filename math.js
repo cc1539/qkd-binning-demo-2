@@ -57,3 +57,13 @@ function entropy(p, base) {
 function shuffleCount(a,b) {
 	return fact(a+b)/(fact(a)*fact(b));
 }
+
+function bin2int(bin) {
+	let out = 0;
+	for(let i=0;i<bin.length;i++) {
+	if(bin[i]) {
+		out += 1<<i;
+	}
+	}
+	return out;
+}
