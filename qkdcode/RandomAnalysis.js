@@ -7,18 +7,23 @@ class RandomAnalysis extends BitStream {
 			this.states = [];
 			this.weight = [];
 			this.last_state = null;
-			this.counts++;
+			this.counts = 0;
 		}
 		
 		addState(symbol) {
+			//console.log(symbol);
 			let state = {};
 			state.symbol = symbol;
 			state.counts = 0;
 			state.index = this.states.length;
 			this.states.push(state);
 			this.weight.push(new Array(this.states.length).fill(0));
-			for(let i=0;i<this.states.length-1;i++) {
-				this.weight[i][this.states.length-1] = 0;
+			for(let i=0;i<this.states.length;i++) {
+			for(let j=0;j<this.states.length;j++) {
+				if(this.weight[i][j]==undefined) {
+					this.weight[i][j] = 0;
+				}
+			}
 			}
 			return state;
 		}
@@ -37,11 +42,11 @@ class RandomAnalysis extends BitStream {
 			if(state==null) {
 				state = this.addState(symbol);
 			}
-			state.counts++;
 			if(this.last_state!=null) {
 				this.weight[this.last_state.index][state.index]++;
 			}
 			this.last_state = state;
+			state.counts++;
 			this.counts++;
 		}
 		
@@ -52,7 +57,7 @@ class RandomAnalysis extends BitStream {
 				let totalWeight = this.weight[i].reduce((a,b)=>a+b);
 				ent += p*entropy(this.weight[i].map(e=>e/totalWeight),this.states.length);
 			}
-			return ent/Math.log(this.states.length);
+			return ent;
 		}
 		
 	}

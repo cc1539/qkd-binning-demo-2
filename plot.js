@@ -265,8 +265,9 @@ class Experiment {
 		for(let t=0;t<iterations;t++) {
 			
 			let bit = Math.random()<this.p;
+			let noerrors = this.a==0 && this.f==0 && this.J==0;
 			
-			if(this.a==0 && this.f==0 && this.J==0) {
+			if(noerrors) {
 				// no errors
 				
 				this.bin_a.write(bit);
@@ -291,7 +292,7 @@ class Experiment {
 				bit_b = true;
 			}
 			
-			if(this.errorc!="none") {
+			if(!noerrors) {
 				
 				channel_a.put(bit_a);
 				channel_b.put(bit_b);
@@ -338,7 +339,7 @@ class Experiment {
 			
 		}
 		switch(plotAxes.y_axis.label) {
-			case "R": { return this.bin_a.getRawKeyRate(); }
+			case "R": { return this.bin_a.getRawKeyRate()*(1-this.errors/this.counts); }
 			case "H": {
 				return this.bin_a.getAnalysis().getMarkovChainEntropy();
 				//return this.bin.getAnalysis().getRandomness();
@@ -487,7 +488,7 @@ class Plot {
 			while(true) {
 				let errors = this.a>0 || this.f>0 || this.J>0;
 				this.out[this.index] = this.samples[this.index].get({
-					iterations: errors?20:10,
+					iterations: 100
 					//y_axis: "R"
 				});
 				this.index++;
