@@ -291,11 +291,14 @@ class Experiment {
 				bit_b = true;
 			}
 			
-			channel_a.put(bit_a);
-			channel_b.put(bit_b);
-			
-			bit_a = channel_a.get();
-			bit_b = channel_b.get();
+			if(this.errorc!="none") {
+				
+				channel_a.put(bit_a);
+				channel_b.put(bit_b);
+				
+				bit_a = channel_a.get();
+				bit_b = channel_b.get();
+			}
 			
 			this.bin_a.write(bit_a);
 			this.bin_b.write(bit_b);
@@ -444,7 +447,7 @@ class Plot {
 	
 	refresh() {
 		
-		this.out = new Array(1000).fill(0);
+		this.out = new Array(400).fill(0);
 		
 		if(this.type=="empirical") {
 			this.samples = new Array(this.out.length).fill(0).map((e,i)=>{
@@ -482,9 +485,9 @@ class Plot {
 				this.index = 0;
 			}
 			while(true) {
-				
+				let errors = this.a>0 || this.f>0 || this.J>0;
 				this.out[this.index] = this.samples[this.index].get({
-					iterations: 20,
+					iterations: errors?20:10,
 					//y_axis: "R"
 				});
 				this.index++;
