@@ -42,8 +42,8 @@ class Experiment {
 			
 			this.type = type;
 			
-			this.blockSize = this.blockSize | blockSize;
-			this.symbolSize = this.symbolSize | symbolSize;
+			this.blockSize = blockSize;
+			this.symbolSize = symbolSize;
 			this.queueSize = blockSize*symbolSize;
 			
 			this.queueA = [];
@@ -64,7 +64,7 @@ class Experiment {
 		}
 		
 		ready() {
-			return (this.queueA.length>=this.queueSize);
+			return this.queueA.length>=this.queueSize;
 		}
 		
 		replaceUndefined() {
@@ -86,7 +86,7 @@ class Experiment {
 		}
 		
 		process() {
-			if(ready()) {
+			if(this.ready()) {
 				this.outputA = this.queueA; // channel a is unchanged
 				
 				switch(this.type) {
@@ -165,14 +165,14 @@ class Experiment {
 							
 							// for now, assume complete error
 							for(let i=0;i<this.queueA.length;i++) {
-								this.output[i] = !this.queueA[i];
+								this.outputB[i] = !this.queueA[i];
 							}
 							
 						} else {
 							
 							// assume complete correction
 							for(let i=0;i<this.queueA.length;i++) {
-								this.output[i] = this.queueA[i];
+								this.outputB[i] = this.queueA[i];
 							}
 							
 						}
@@ -197,8 +197,8 @@ class Experiment {
 		
 		// error correction
 		this.errorc = options.errorc;
-		this.blockSize = options.B;
-		this.symbolSize = options.S;
+		this.blockSize = options.B | 3;
+		this.symbolSize = options.S | 1;
 		
 		// bins
 		this.bin_a = new BinningScheme();
@@ -223,16 +223,13 @@ class Experiment {
 	
 	get(options) {
 		
-		let jitter = this.J;
-		/*
-		if(this.errorc=="jitter") {
-			jitter = 0;
-		}
-		*/
-		let channel_a = new Experiment.JitterChannel(jitter);
-		let channel_b = new Experiment.JitterChannel(jitter);
+		let channel_a = new Experiment.JitterChannel(this.J);
+		let channel_b = new Experiment.JitterChannel(this.J);
 		
-		let ec_channel = new Experiment.ErrorCorrectionChannel(this.errorc,this.B,this.S);
+		let ec_channel = new Experiment.ErrorCorrectionChannel(
+				this.errorc,
+				this.blockSize,
+				this.symbolSize);
 		
 		// flush out the jitter channel
 		for(let t=0;t<3;t++) {
@@ -304,30 +301,35 @@ class Experiment {
 			this.bin_b.write(bit_b);
 			
 			while(this.bin_a.output.ready() || this.bin_b.output.ready()) {
+				
 				let out_a = this.bin_a.output.read();
 				let out_b = this.bin_b.output.read();
 				
-				ec_channel.putA(out_a);
-				ec_channel.putB(out_b);
-				/*
-				if(ec_channel.ready()) {
-					ec_channel.process();
-					for(let i=0;i<ec_channel.outputA.length;i++) {
-						let out_a = ec_channel.outputA[i];
-						let out_b = ec_channel.outputB[i];
-						if(out_a!=out_b) {
-							this.errors++;
-							this.bin_a.getAnalysis().counts--;
-						}
-						this.counts++;
+				if(this.errorc=="none") {
+					
+					if(out_a!=out_b) {
+						this.errors++;
 					}
+					this.counts++;
+					
+				} else {
+					
+					ec_channel.putA(out_a);
+					ec_channel.putB(out_b);
+					
+					if(ec_channel.ready()) {
+						ec_channel.process();
+						for(let i=0;i<ec_channel.outputA.length;i++) {
+							let out_a = ec_channel.outputA[i];
+							let out_b = ec_channel.outputB[i];
+							if(out_a!=out_b) {
+								this.errors++;
+							}
+							this.counts++;
+						}
+					}
+					
 				}
-				*/
-				if(out_a!=out_b) {
-					this.errors++;
-					this.bin_a.getAnalysis().counts--;
-				}
-				this.counts++;
 				
 			}
 			
@@ -432,7 +434,7 @@ class Plot {
 		
 		$(this.controls).find("select[name='scheme']").val(this.scheme);
 		$(this.controls).find("select[name='sim']").val(this.type);
-		$(this.controls).find("select[name='errorc']").val(this.type);
+		$(this.controls).find("select[name='errorc']").val(this.errorc);
 		$(this.controls).find("input[type='color']").val(this.color);
 		"ndpJafBS".split('').forEach(e=>{
 			$(this.controls).find("input[name='"+e+"']").val(this[e]);
@@ -473,11 +475,12 @@ class Plot {
 	}
 	
 	refine() {
+		
 		let startTime = millis();
 		for(let i=0;i<this.out.length;i++) {
 		if(this.type=="empirical") {
 			this.out[i] = this.samples[i].get({
-				iterations: 10,
+				iterations: 100,
 				y_axis: "R"
 			});
 		} else {

@@ -126,7 +126,7 @@ function setup() {
 		$(pc).find("select[name='sim']").on("change",function(){
 			plot.update({type:$(this).val()});
 		});
-		$(pc).find("select[name='ec']").on("change",function(){
+		$(pc).find("select[name='errorc']").on("change",function(){
 			plot.update({errorc:$(this).val()});
 		});
 		
@@ -134,13 +134,14 @@ function setup() {
 			scheme: "sb",
 			type: "empirical",
 			color: $(titlebar).find("input[type='color']").val(),
+			errorc: "none",
 			n: 8,
 			d: 0,
 			p: 0.01,
 			J: 0,
 			a: 0,
 			f: 0,
-			B: 8,
+			B: 3,
 			S: 1
 		}));
 		
