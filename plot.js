@@ -477,13 +477,29 @@ class Plot {
 	refine() {
 		
 		let startTime = millis();
-		for(let i=0;i<this.out.length;i++) {
 		if(this.type=="empirical") {
-			this.out[i] = this.samples[i].get({
-				iterations: 100,
-				y_axis: "R"
-			});
+			if(typeof this.index!="number") {
+				this.index = 0;
+			}
+			while(true) {
+				
+				this.out[this.index] = this.samples[this.index].get({
+					iterations: 20,
+					//y_axis: "R"
+				});
+				this.index++;
+				if(this.index>=this.out.length) {
+					this.index = 0;
+				}
+				
+				let elapsedTime = (millis()-startTime); // in milliseconds
+				if(elapsedTime>20) {
+					break;
+				}
+				
+			}
 		} else {
+			for(let i=0;i<this.out.length;i++) {
 			if(this.out[i]==null) {
 				
 				let options = {
@@ -506,7 +522,7 @@ class Plot {
 					break;
 				}
 			}
-		}
+			}
 		}
 	}
 	
