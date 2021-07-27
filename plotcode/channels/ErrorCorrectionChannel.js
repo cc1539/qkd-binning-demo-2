@@ -17,24 +17,10 @@ Experiment.ErrorCorrectionChannel = class {
 		}
 		
 		hasUndefined() {
-			
 			let check = (a,b)=>(a==undefined||b==undefined?undefined:true);
 			if(this.queueA.reduce(check)==undefined) { return true; }
 			if(this.queueB.reduce(check)==undefined) { return true; }
 			return false;
-			
-			/*
-			for(let i=0;i<this.queueA.length;i++) {
-			if(this.queueA[i]==undefined) {
-				return true;
-			}
-			}
-			for(let i=0;i<this.queueB.length;i++) {
-			if(this.queueB[i]==undefined) {
-				return true;
-			}
-			}
-			*/
 		}
 		
 	}
