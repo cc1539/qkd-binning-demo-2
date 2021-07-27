@@ -97,7 +97,7 @@ class RandomAnalysis extends BitStream {
 		
 		if(this.length()>=this.letterSize) {
 			let symbol = this.readInt(this.letterSize);
-			this.markovchain.record(symbol);
+			this.markovchain.record(symbol+"");
 			this.bins[symbol]++;
 		}
 		
