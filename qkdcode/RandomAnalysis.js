@@ -11,7 +11,6 @@ class RandomAnalysis extends BitStream {
 		}
 		
 		addState(symbol) {
-			//console.log(symbol);
 			let state = {};
 			state.symbol = symbol;
 			state.counts = 0;
@@ -55,7 +54,8 @@ class RandomAnalysis extends BitStream {
 			for(let i=0;i<this.states.length;i++) {
 				let p = this.states[i].counts/this.counts;
 				let totalWeight = this.weight[i].reduce((a,b)=>a+b);
-				ent += p*entropy(this.weight[i].map(e=>e/totalWeight),this.states.length);
+				let Hi = entropy(this.weight[i].map(e=>e/totalWeight),this.states.length);
+				ent += p*Hi;
 			}
 			return ent;
 		}
