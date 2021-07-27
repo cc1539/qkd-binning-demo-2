@@ -226,6 +226,10 @@ div::-webkit-scrollbar-thumb {
 	width: 50px;
 }
 
+#controls .axis-controls select[name="color_scheme"] {
+	width: 202px;
+}
+
 #controls .axis-controls select {
 	width: 250px;
 }
