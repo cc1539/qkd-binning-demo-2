@@ -1,5 +1,6 @@
 
 var plotPalette;
+var plotColors;
 
 var binTypes = {
 	"sb": SimpleBinning.prototype,
@@ -22,6 +23,11 @@ var plotAxes = {
 };
 
 function setup() {
+	
+	plotColors = {
+		bg: color(0),
+		fg: color(255),
+	};
 	
 	plotPalette = [
 		color(255,0,0),
@@ -173,6 +179,16 @@ function setup() {
 		color: "#FF00FF"
 	}).updateControls();
 	
+	// plot color scheme
+	$(".axis-controls select[name='color_scheme']").on("change",function(){
+		if($(this).val()=="dark") {
+			plotColors.fg = color(255);
+			plotColors.bg = color(0);
+		} else {
+			plotColors.fg = color(0);
+			plotColors.bg = color(255);
+		}
+	});
 	
 	// axis controls
 	$(".axis-controls select[name='x_axis']").on("change",function(){
@@ -207,9 +223,9 @@ function windowResized() {
 }
 
 function draw() {
-	background(0);
+	background(plotColors.bg);
 	
-	stroke(32);
+	stroke(lerpColor(plotColors.bg,plotColors.fg,.125));
 	for(let i=0;i<width;i+=100) {
 		line(i,0,i,height);
 	}

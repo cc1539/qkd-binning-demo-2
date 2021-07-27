@@ -10,19 +10,19 @@ function drawGridFrame(options) {
 	let xlines = floor(width/100);
 	for(let i=0;i<xlines;i++) { 
 		let offset = (i+1)/xlines*options.w;
-		stroke(64);
+		stroke(lerpColor(plotColors.bg,plotColors.fg,.25));
 		line(
 			options.x+offset,
 			options.y,
 			options.x+offset,
 			options.y+options.h);
-		stroke(255);
+		stroke(plotColors.fg);
 		line(
 			options.x+offset,
 			options.y+options.h,
 			options.x+offset,
 			options.y+options.h+10);
-		fill(255);
+		fill(plotColors.fg);
 		noStroke();
 		textAlign(CENTER,TOP);
 		let coord = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,(i+1)/xlines);
@@ -34,19 +34,19 @@ function drawGridFrame(options) {
 	let ylines = floor(height/100);
 	for(let i=0;i<ylines;i++) { 
 		let offset = i/ylines*options.h;
-		stroke(64);
+		stroke(lerpColor(plotColors.bg,plotColors.fg,.25));
 		line(
 			options.x,
 			options.y+offset,
 			options.x+options.w,
 			options.y+offset);
-		stroke(255);
+		stroke(plotColors.fg);
 		line(
 			options.x,
 			options.y+offset,
 			options.x-10,
 			options.y+offset);
-		fill(255);
+		fill(plotColors.fg);
 		noStroke();
 		textAlign(RIGHT,CENTER);
 		let coord = lerp(plotAxes.y_axis.minval,plotAxes.y_axis.maxval,1-i/ylines);
@@ -56,12 +56,12 @@ function drawGridFrame(options) {
 		text(num,options.x-15,options.y+offset+1)
 	}
 	
-	stroke(255); line(
+	stroke(plotColors.fg); line(
 		options.x,
 		options.y,
 		options.x,
 		options.y+options.h);
-	stroke(255); line(
+	stroke(plotColors.fg); line(
 		options.x,
 		options.y+options.h,
 		options.x+options.w,
@@ -70,8 +70,8 @@ function drawGridFrame(options) {
 }
 
 function drawAxes(options) {
-	fill(255);
-	stroke(0);
+	fill(plotColors.fg);
+	stroke(plotColors.bg);
 	
 	textAlign(CENTER,TOP);
 	text($("select[name='x_axis'] option:selected").text(),options.x+options.w/2,options.y+options.h+40);
