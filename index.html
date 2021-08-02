@@ -139,10 +139,8 @@
 		<div id="info">
 			<button class="toggle">&#8505;&#65039;</button>
 			<div class="content">
-				<p>What you're seeing here is the result of attempting to use time binning to extract information from a stream of bits. The incoming bits are modeled as an iid Bernoulli(p) distribution, corresponding to a probability p of any one time bin being occupied by at least one photon. However, these bits may also be altered by various sources of error, including jitter J, recovery-time d, absorption probability a, and dark count probability f.</p>
-				<p>The plots to the left are of keyrate R, entropy ratio H, and entropy rate I vs the parameter p introduced above. The key rate R is how many literal bits on average we can extract per time bin. The entropy ratio H is how many bits of true information theoretic information we obtain per literal bit. The entropy rate I is simply the key rate R and entropy ratio H multiplied.</p>
-				<p>For any plot, you can choose to use an empirical simulation or an analytical simulation. The empirical simulation actually generates bits internally (that is, by using Math.random()) and applies the chosen binning scheme to extract actual bits. The empirical entropy ratio is calculated as shannon entropy. The analytical simulation uses a markov chain to model the system. Under ideal conditions, we don't even have to go as far as using a markov chain to obtain the key rate R, but in the case of recovery time d greater than zero, the occupancy of our bins are no longer iid, and a form of memory must be included in our analysis to produce accurate results.</p>
-				<br>
+				
+				<p>What you're seeing here is the result of attempting to use time-entanglement to extract information from a stream of bits. In ideal conditions, the incoming bits are modeled as an iid Bernoulli(p) distribution, corresponding to a probability p of any one time bin being occupied by at least one photon. However, these bits may also be altered by various sources of error, including jitter J, recovery-time d, absorption probability a, and dark count probability f.
 				<p>
 					<b>Summary</b><br>
 					<p>p = initial probability of time bin being occupied</p>
@@ -154,6 +152,24 @@
 					<p>H = entropy ratio, how many information theoretic bits are extracted per literal bit</p>
 					<p>I = entropy rate, how many information theoretic bits are extracted per time bin</p>
 				</p>
+				
+				<b>Axis Controls</b>
+				<p>Which of these variables change depending on the x-axis can be changed using the X Axis drop-down menu in the controls to the left.</p>
+				<p>For the y-axis, the Y Axis drop-down menu includes naiive keyrate R (considers bits but not their entropy/randomness), the average probability of bitwise error Pe, entropy ratio H (the entropy/information rate divided by naiive keyrate R), and R' (estimated true entropy rate). <!--The key rate R is how many literal bits on average we can extract per time bin. The entropy ratio H is how many bits of true information theoretic information we obtain per literal bit. The entropy rate I is simply the key rate R and entropy ratio H multiplied.--></p>
+				<b>Binning Schemes</b>
+				
+				<p>There are four binning schemes to choose from. "Simple Binning" is PPM (pulse position modulation), applied to not only a bit string but also its inverse. "Adaptive Binning" is also PPM, but with an adaptive bin size, where if the bit string does not follow a valid one-hot encoding, we merge (with bitwise OR) every other bin with the next one and try again until we're left with only two bits. "Adaptive Aggregated Binning" is "Adaptive Binning", but where we manipulate the positions of bits to force a valid bit-extracting configuration. The way we permute the bits is transmitted over the public channel. In "Adaptive Framing", we split frames into l subframes, where l is the number of occupied bins, permute the bits so that only one of the l occupied bins lands in each subframe, and then process each subframe using PPM. The way we permute the bits is once again transmitted over the public channel.</p>
+				
+				<b>Analysis Type</b>
+				<p>For any plot, you can choose to use an empirical simulation or an analytical simulation. The empirical simulation actually generates bits internally (using Math.random()) and applies the chosen binning scheme to extract bit values that can be downloaded for further analysis. The empirical entropy ratio is calculated using a Markov Model. The analytical simulation uses a markov chain to model the system. Under ideal conditions, a markov chain isn't used to obtain the key rate R, but in the case of recovery time d greater than zero, the occupancy of our bins are no longer iid, and a form of memory must be included in our analysis to produce accurate results.</p>
+				
+				<b>Error Correction</b>
+				<p>There are four types of Error-Correction to choose from. These error correction schemes are all applied to the input frames themselves. The first option, Hamming error correction, can only fix single bit flips. Since errors like jitter affect two bits at once, we combined Hamming with grey coding in the second option, so that jitters will only flip one bit. The third option is generic low-density parity coding, and the final option is Reed-Solomon coding. The Block Size determines the number of bits that the error-correction coding is applied to at any point. The symbol size determines the size, in bits, of each symbol, which should be 1 in all cases except for the Reed-Solomon code.</p>
+				
+				<b>
+				
+				<br>
+				
 			</div>
 		</div>
 		
