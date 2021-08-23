@@ -86,19 +86,26 @@ Experiment.ErrorCorrectionChannel.H = class extends Experiment.ErrorCorrectionCh
 		}
 	}
 	
+	parity(bin) {
+		return bin.map((e,i)=>e?(i+1):0).reduce((a,b)=>a^b,false);
+	}
+	
 	process() {
-		
+		/*
 		let content_length = this.queueA.length;
 		this.updateGeneratorMatrix(content_length);
 		this.updateParityCheckMatrix(content_length);
-		
+		*/
 		// fix single bit flip
 		this.replaceUndefined();
-		let parity_a = this.queueA.map((e,i)=>e?i:0).reduce((a,b)=>a^b);
-		let parity_b = this.queueB.map((e,i)=>e?i:0).reduce((a,b)=>a^b);
-		let error_location = parity_b^parity_a;
-		this.queueB[error_location] ^= true;
+		let parity_a = this.parity(this.queueA);
+		let parity_b = this.parity(this.queueB);
+		let error_location = (parity_b^parity_a)-1;
+		if(error_location!=-1) {
+			this.queueB[error_location] ^= true;
+		}
 		this.outputB = this.queueB.splice(0,this.queueB.length);
+		
 	}
 	
 }
