@@ -74,8 +74,8 @@ class Plot {
 			while(true) {
 				let errors = this.a>0 || this.f>0 || this.J>0;
 				this.out[this.index] = this.samples[this.index].get({
-					iterations: 100
-					//y_axis: "R"
+					iterations: 100,
+					request: plotAxes.y_axis.label
 				});
 				this.index++;
 				if(this.index>=this.out.length) {

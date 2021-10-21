@@ -23,6 +23,14 @@ class BitStream {
 		return bit;
 	}
 	
+	readall() {
+		let output = [];
+		while(this.ready()) {
+			output.push(this.read());
+		}
+		return output;
+	}
+	
 	ready() {
 		return this.length()>0;
 	}

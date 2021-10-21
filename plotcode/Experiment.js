@@ -68,9 +68,12 @@ class Experiment {
 			
 		}
 		
-		let iterations = options.iterations;
+		let bit_output = [];
+		const BITS_REQUEST = "bits";
+		
+		let iterations = options.iterations || 0;
 		let y_axis = options.y_axis;
-		for(let t=0;t<iterations;t++) {
+		for(let t=0;t<iterations || (options.request==BITS_REQUEST && bit_output.length<options.bitlen);t++) {
 			
 			let bit = Math.random()<this.p;
 			let noerrors = this.a==0 && this.f==0 && this.J==0;
@@ -80,6 +83,10 @@ class Experiment {
 				
 				this.bin_a.write(bit);
 				this.counts = 1;
+				
+				if(options.request==BITS_REQUEST) {
+					bit_output = bit_output.concat(this.bin_a.getOutput().readall());
+				}
 				
 				continue;
 			}
@@ -116,6 +123,10 @@ class Experiment {
 					}
 					this.counts++;
 					
+					if(options.request==BITS_REQUEST) {
+						bit_output.push(out_a);
+					}
+					
 				} else {
 					
 					ec_channel.putA(out_a);
@@ -124,12 +135,17 @@ class Experiment {
 					if(ec_channel.ready()) {
 						ec_channel.process();
 						for(let i=0;i<ec_channel.outputA.length;i++) {
-							let out_a = ec_channel.outputA[i];
-							let out_b = ec_channel.outputB[i];
-							if(out_a!=out_b) {
+							let ec_out_a = ec_channel.outputA[i];
+							let ec_out_b = ec_channel.outputB[i];
+							if(ec_out_a!=ec_out_b) {
 								this.errors++;
 							}
 							this.counts++;
+							
+							if(options.request==BITS_REQUEST) {
+								bit_output.push(ec_out_a);
+							}
+							
 						}
 					}
 					
@@ -138,17 +154,22 @@ class Experiment {
 			}
 			
 		}
-		switch(plotAxes.y_axis.label) {
-			case "R": { return this.bin_a.getRawKeyRate()*(1-this.errors/this.counts); }
+		
+		switch(options.request) {
+			case "R": {
+				return this.bin_a.getRawKeyRate()*(1-this.errors/this.counts);
+			}
 			case "H": {
 				return this.bin_a.getAnalysis().getMarkovChainEntropy();
-				
 			}
 			case "Pe": { // probability of error
 				return this.errors/this.counts;
 			}
 			case "Rf": { // final rate
-				return Math.random();
+				return this.bin_a.getRawKeyRate()*(1-this.errors/this.counts); // TODO?
+			}
+			case BITS_REQUEST: {
+				return bit_output;
 			}
 		}
 		

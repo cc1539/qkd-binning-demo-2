@@ -233,3 +233,29 @@ div::-webkit-scrollbar-thumb {
 #controls .axis-controls select {
 	width: 250px;
 }
+
+/***************************** THE WAIT OVERLAY *****************************/
+
+#wait-overlay {
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	opacity: 70%;
+	background-color: black;
+	color: white;
+	z-index: 5;
+}
+
+#wait-overlay > h1 {
+	position: fixed;
+	text-align: center;
+	vertical-align: middle;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 100vw;
+	font-size: 20px;
+	opacity: 100%;
+	background-color: none;
+	letter-spacing: 3px;
+}
+

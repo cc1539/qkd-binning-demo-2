@@ -31,8 +31,14 @@
 		
 		<script src="math.js"></script>
 		<script src="main.js"></script>
+		<script src="wait.js"></script>
 	</head>
 	<body>
+	
+		<div id="wait-overlay" style="display:none;">
+			<h1>Processing...</h1>
+		</div>
+	
 		<div id="controls">
 			<button class="toggle">&#9881;&#65039;</button>
 			<div class="content">
@@ -124,13 +130,17 @@
 						<div class="param"><label>P(Dark Count)</label><input name="f" type="text" autocomplete="off" value="0"></input>
 						<input type="range" step="0.01" name="f" min="0" max="1"></div><hr>
 						<!--<button>Update Plot</button>-->
-						<br><br>
-						
-						<!--
-						<div class="param"><label>Sample Sequence Length (in bits)</label><input name="sampleseq" type="text" autocomplete="off" value="65535"></input></div><hr>
-						<button>Download Sample Sequence</button>
 						<br>
-						-->
+						
+						<div class="param"><label>Sample Sequence Length (in bits)</label><input name="dl-bit-len" type="text" autocomplete="off" value="16384"></input></div><hr>
+						<div class="param"><label>Data Format</label>
+						<select name="dl-data-format">
+							<option value="raw">Raw Binary (Bytes)</option>
+							<option value="txt">ASCII 1s and 0s</option>
+						</select></div><hr>
+						<button id="dl-sample-button">Download Sample</button>
+						<br>
+						
 					</div>
 				</div>
 			</div>

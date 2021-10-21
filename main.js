@@ -81,9 +81,11 @@ function setup() {
 		
 		let plot = new Plot();
 		plot.controls = pc;
-		
 		pc.show();
+		
 		$("#controls .content").append(pc);
+		
+		// titlebar, with buttons to duplicate or remove a plot
 		let titlebar = $(pc).find(".titlebar");
 		$(titlebar).click(()=>{
 			$(titlebar).parent().find(".controls").toggle();
@@ -106,6 +108,7 @@ function setup() {
 			addPlot($(titlebar).parent().clone());
 		});
 		
+		// color controls
 		let color = plotPalette[floor(random(0,plotPalette.length))];
 		let hexcolor = "#"
 			+(color.levels[0].toString(16).padStart(2,'0'))
@@ -116,6 +119,7 @@ function setup() {
 			plot.update({color:$(this).val()});
 		});
 		
+		// system parameters
 		"ndpJafBS".split('').forEach(e=>{
 			let inputs = $(pc).find("input[name='"+e+"']");
 			inputs.eq(1).val(inputs.eq(0).val());
@@ -136,6 +140,7 @@ function setup() {
 			plot.update({errorc:$(this).val()});
 		});
 		
+		// add in a plot upon creation
 		plots.push(plot.update({
 			scheme: "sb",
 			type: "empirical",
@@ -150,6 +155,89 @@ function setup() {
 			B: 3,
 			S: 1
 		}));
+		
+		// download button
+		let dl_start_time = millis();
+		let dl_end_time = millis();
+		let download_sample = function(){
+			dl_start_time = millis();
+			
+			let content_length = $(pc).find("input[name='dl-bit-len']").val();
+			let content_format = $(pc).find("select[name='dl-data-format']").val();
+			
+			let experiment_settings = {
+				scheme: $(pc).find("select[name='scheme']").val(),
+				errorc: $(pc).find("select[name='errorc']").val(),
+				n: 8,
+				d: 0,
+				p: 0.01,
+				J: 0,
+				a: 0,
+				f: 0,
+				B: 3,
+				S: 1
+			};
+			"ndpJafBS".split('').forEach(e=>{
+				experiment_settings[e] = $(pc).find("input[name='"+e+"']").val();
+			});
+			
+			//console.log("downloading sample with length "+content_length+" and format "+content_format+" and settings: ");
+			//console.log(experiment_settings);
+			
+			let experiment = new Experiment(experiment_settings);
+			let bit_output = experiment.get({
+				request: "bits",
+				bitlen: content_length
+			});
+			let filetype = "text/txt";
+			
+			let convert_file_format = {};
+			
+			convert_file_format["raw"] = function() {
+				filetype = "application/octet-stream";
+				let out_buffer = [];
+				while(bit_output.length>0) {
+					let byte_arr = bit_output.splice(0,8);
+					out_buffer.push(bin2int(byte_arr))
+				}
+				bit_output = Uint8Array.from(out_buffer);
+			};
+			
+			convert_file_format["txt"] = function() {
+				filetype = "text/plain";
+				let out_buffer = "";
+				for(let i=0;i<bit_output.length;i++) {
+					out_buffer += bit_output[i]?'1':'0';
+				}
+				bit_output = out_buffer;
+			};
+			
+			convert_file_format[content_format]();
+			
+			let filename = "output.bin";
+			let blob = new Blob([bit_output],{type:filetype});
+			if(window.navigator.msSaveOrOpenBlob) {
+				window.navigator.msSaveBlob(blob,filename);
+			} else {
+				let elem = document.createElement("a");
+				elem.href = window.URL.createObjectURL(blob);
+				elem.download = filename;
+				document.body.appendChild(elem);
+				elem.click();
+				document.body.removeChild(elem);
+				window.URL.revokeObjectURL(blob);
+			}
+			
+			dl_end_time = millis();
+			
+			hideWaitOverlay();
+			
+			console.log("download took "+(dl_end_time-dl_start_time)/1e3+"s");
+		}
+		$(pc).find("#dl-sample-button").on("click",function(){
+			showWaitOverlay();
+			setTimeout(download_sample,100);
+		});
 		
 		return plot;
 	};
