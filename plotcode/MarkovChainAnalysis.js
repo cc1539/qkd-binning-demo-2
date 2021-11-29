@@ -51,6 +51,7 @@ class MarkovChainAnalysis {
 		switch(plotAxes.y_axis.label) {
 			case "H": { return this.tbmc.entropyFromMatrix(limit,state,true); }
 			case "R": { return this.tbmc.keyrateFromState(state); }
+			case "Rf": { return this.tbmc.entropyFromMatrix(limit,state,true)*this.tbmc.keyrateFromState(state); }
 		}
 	}
 	
