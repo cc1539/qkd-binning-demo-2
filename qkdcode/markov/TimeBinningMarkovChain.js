@@ -2,6 +2,10 @@
 TimeBinningMarkovChain = class {
 	
 	constructor(n,d,scheme) {
+		this.n = n;
+		this.d = d;
+		this.scheme = scheme;
+		
 		let states = [];
 		
 		// generate states
@@ -116,6 +120,7 @@ TimeBinningMarkovChain = class {
 	}
 	
 	entropyFromMatrix(matrix,state,modified) {
+		/*
 		let keyRate = [];
 		let entropy = [];
 		let totalRate = 0;
@@ -171,16 +176,159 @@ TimeBinningMarkovChain = class {
 			}
 		}
 		}
+		let out = 0;
 		if(totalRate>0) {
-			let out = 0;
 			for(let key in keyRate) {
 				let q = keyRate[key]/totalRate;
 				let ent = entropy[key]/keyRate[key];
 				out += (q>0||q<1)?(-q*log(q)*ent):0;
 			}
-			return out/log(Object.keys(keyRate).length);
+			out /= log(Object.keys(keyRate).length);
 		}
-		return 0;
+		return out;
+		*/
+		
+		let has_output = []; // whether a particular state has output bits according to the binning scheme being used
+		let output_states = []; // set of all the possible outputs from an individual frame
+		let sequence_matrix = []; // shows which states map to which output states
+		for(let i=0;i<this.stateArray.length;i++) {
+			let sequence = TimeBinningMarkovChain.generate(
+				this.n,this.d,
+				this.stateArray[i].t,
+				this.stateArray[i].dl,
+				this.stateArray[i].dr);
+			sequence_matrix[i] = [];
+			has_output[i] = false;
+			if(sequence.length>0) {
+				for(let seq of sequence) {
+					let output = this.scheme.apply(seq);
+					if(output.length>0) {
+						has_output[i] = true;
+						sequence_matrix[i].push(output);
+						output_states[output] = [];
+					}
+				}
+			}
+		}
+		
+		let output_station = [];
+		{
+			let output_sum = 0;
+			for(let i=0;i<state.length;i++) {
+				if(has_output[i]) {
+					output_station[i] = state[i];
+					output_sum += state[i];
+				} else {
+					output_station[i] = 0;
+				}
+			}
+			for(let i=0;i<state.length;i++) {
+				output_station[i] /= output_sum;
+			}
+		}
+		
+		let transition_matrix = [];
+		for(let i=0;i<matrix.length;i++) {
+			transition_matrix[i] = Array(matrix.length).fill(0);
+			let sum = 0;
+			for(let j=0;j<matrix.length;j++) {
+				sum += matrix[j][i];
+			}
+			for(let j=0;j<matrix.length;j++) {
+				transition_matrix[i][j] = matrix[j][i]/sum;
+			}
+		}
+		
+		// generate a matrix where for all has_output[i]==true, the state i transitions to itself
+		let output_matrix = [];
+		for(let i=0;i<matrix.length;i++) {
+			output_matrix[i] = Array(matrix.length).fill(0);
+			if(has_output[i]) {
+				output_matrix[i][i] = 1;
+			} else {
+				for(let j=0;j<matrix.length;j++) {
+					output_matrix[i][j] = transition_matrix[i][j];
+				}
+			}
+		}
+		
+		let ent = 0;
+		
+		for(let i=0;i<this.stateArray.length;i++) {
+		if(has_output[i]) {
+			let station = Array(this.stateArray.length).fill(0);
+			station[i] = 1;
+			this.applyMatrix(transition_matrix,station); // apply the regular transition matrix once...
+			for(let t=0;t<1000;t++) {
+				if(this.mapWeight(station,has_output)>.99) {
+					break;
+				}
+				this.applyMatrix(output_matrix,station);
+			}
+			let sum = 0;
+			for(let i=0;i<station.length;i++) {
+				if(has_output[i]) {
+					sum += station[i];
+				} else {
+					station[i] = 0;
+				}
+			}
+			if(sum!=0) {
+				for(let i=0;i<station.length;i++) {
+					station[i] /= sum;
+				}
+			}
+			
+			let transitions = {};
+			for(let output in output_states) {
+				transitions[output] = 0;
+			}
+			for(let i=0;i<station.length;i++) {
+			if(has_output[i]) {
+				for(let j=0;j<sequence_matrix[i].length;j++) {
+					transitions[sequence_matrix[i][j]] += station[i]/sequence_matrix[i].length;
+				}
+			}
+			}
+			
+			let ent_i = 0;
+			for(let i in transitions) {
+				let transition = transitions[i];
+				if(transition>0) {
+					ent_i += transition*log(transition);
+				}
+			}
+			ent += ent_i*output_station[i];
+		}
+		}
+		
+		return ent/log(output_states.length);
+	}
+	
+	mapWeight(station,has_output) {
+		let out = 0;
+		for(let i=0;i<station.length;i++) {
+		if(has_output[i]) {
+			out += station[i];
+		}
+		}
+		return out;
+	}
+	
+	applyMatrix(matrix,station) {
+		let next_station = Array(matrix.length).fill(0);
+		for(let i=0;i<matrix.length;i++) {
+		for(let j=0;j<matrix.length;j++) {
+			next_station[j] += station[i]*matrix[i][j];
+		}
+		}
+		let sum = 0;
+		for(let i=0;i<next_station.length;i++) {
+			sum += next_station[i];
+		}
+		for(let i=0;i<next_station.length;i++) {
+			station[i] = next_station[i]/sum;
+		}
 	}
 	
 	keyrateFromState(state) {

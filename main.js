@@ -312,7 +312,7 @@ function windowResized() {
 
 function draw() {
 	background(plotColors.bg);
-	
+	/*
 	stroke(lerpColor(plotColors.bg,plotColors.fg,.125));
 	for(let i=0;i<width;i+=100) {
 		line(i,0,i,height);
@@ -320,7 +320,7 @@ function draw() {
 	for(let i=0;i<height;i+=100) {
 		line(0,i,width,i);
 	}
-	
+	*/
 	drawPlots();
 }
 

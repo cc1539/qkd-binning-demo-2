@@ -23,7 +23,7 @@ class Experiment {
 		this.bin_a.setBinSize(1);
 		this.bin_a.setFrameSize(this.n);
 		this.bin_a.setDeadTime(this.d);
-		this.bin_a.getAnalysis().setLetterSize(1<<this.n);
+		this.bin_a.getAnalysis().setLetterSize(log2(this.n));
 		
 		this.bin_b = new BinningScheme();
 		this.bin_b.setSchemeType(binTypes[this.scheme]);
@@ -31,7 +31,7 @@ class Experiment {
 		this.bin_b.setBinSize(1);
 		this.bin_b.setFrameSize(this.n);
 		this.bin_b.setDeadTime(this.d);
-		this.bin_b.getAnalysis().setLetterSize(1<<this.n);
+		this.bin_b.getAnalysis().setLetterSize(log2(this.n));
 		
 		this.errors = 0;
 		this.counts = 0;
@@ -156,23 +156,29 @@ class Experiment {
 		}
 		
 		switch(options.request) {
-			case "R": {
-				return this.bin_a.getRawKeyRate()*(1-this.errors/this.counts);
-			}
-			case "H": {
-				return this.bin_a.getAnalysis().getMarkovChainEntropy();
-			}
-			case "Pe": { // probability of error
-				return this.errors/this.counts;
-			}
-			case "Rf": { // final rate
-				return this.bin_a.getRawKeyRate()*(1-this.errors/this.counts); // TODO?
-			}
-			case BITS_REQUEST: {
-				return bit_output;
-			}
+			case "R": { return this.requestKeyRate(); }
+			case "H": { return this.requestEntropyRatio(); }
+			case "Pe": { return this.requestErrorRate(); }
+			case "Rf": { return this.requestEntropyRate(); }
+			case BITS_REQUEST: { return bit_output; }
 		}
 		
+	}
+	
+	requestErrorRate() {
+		return this.errors/this.counts;
+	}
+	
+	requestKeyRate() {
+		return this.bin_a.getRawKeyRate()*(1-this.requestErrorRate());
+	}
+	
+	requestEntropyRatio() {
+		return this.bin_a.getAnalysis().getMarkovChainEntropy();
+	}
+	
+	requestEntropyRate() {
+		return this.requestKeyRate()*this.requestEntropyRatio();
 	}
 	
 }

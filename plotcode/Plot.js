@@ -12,7 +12,18 @@ class Plot {
 		$(this.controls).find(".titlebar p:nth-child(2)").text(
 			$(this.controls).find("select[name='scheme'] option[value='"+this.scheme+"']").text());
 		
-		this.refresh();
+		let num_update = false;
+		
+		for(let option in options) {
+		if(option!="color") {
+			num_update = true;
+			break;
+		}
+		}
+		
+		if(num_update) {
+			this.refresh();
+		}
 		
 		return this;
 	}
@@ -57,9 +68,10 @@ class Plot {
 				
 				return new Experiment(options);
 			});
-		} else {
+		} else if(this.type=="analytical") {
 			this.samples = null;
 			this.out.fill(null);
+			this.analytical_scale = 1;
 		}
 		
 	}
@@ -88,7 +100,8 @@ class Plot {
 				}
 				
 			}
-		} else {
+		} else if(this.type=="analytical") {
+			
 			for(let i=0;i<this.out.length;i++) {
 			if(this.out[i]==null) {
 				
@@ -100,14 +113,18 @@ class Plot {
 					J: this.J,
 					a: this.a,
 					f: this.f,
-					x: i/(this.out.length-1)
+					x: i/(this.out.length-1),
+					label: plotAxes.y_axis.label
 				};
 				
 				options[plotAxes.x_axis.label] = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,options.x);
 				
 				this.out[i] = new MarkovChainAnalysis(options).get();
-				if(plotAxes.y_axis.label=="H" && this.n==2) {
-					this.out[i] *= 2;
+				if(i==1) {
+					this.analytical_scale = this.out[i];
+				}
+				if(plotAxes.y_axis.label=="H") {
+					this.out[i] /= this.analytical_scale;
 				}
 				
 				let elapsedTime = (millis()-startTime); // in milliseconds
@@ -116,6 +133,7 @@ class Plot {
 				}
 			}
 			}
+			
 		}
 	}
 	

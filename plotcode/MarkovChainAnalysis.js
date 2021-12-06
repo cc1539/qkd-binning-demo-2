@@ -40,6 +40,7 @@ class MarkovChainAnalysis {
 		this.J = options.J;
 		this.a = options.a;
 		this.f = options.f;
+		this.label = options.label;
 		
 		this.tbmc = MarkovChainAnalysis.getChain(this.n,this.d,binTypes[this.scheme]);
 	}
@@ -48,7 +49,7 @@ class MarkovChainAnalysis {
 		let p = this.p*(1-this.a)+(1-this.p)*this.f;
 		let limit = this.tbmc.transition(p);
 		let state = this.tbmc.stationaryFromMatrix(0,limit);
-		switch(plotAxes.y_axis.label) {
+		switch(this.label) {
 			case "H": { return this.tbmc.entropyFromMatrix(limit,state,true); }
 			case "R": { return this.tbmc.keyrateFromState(state); }
 			case "Rf": { return this.tbmc.entropyFromMatrix(limit,state,true)*this.tbmc.keyrateFromState(state); }

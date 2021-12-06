@@ -37,6 +37,7 @@ class RandomAnalysis extends BitStream {
 		}
 		
 		record(symbol) {
+			//console.log("recorded symbol: "+symbol);
 			let state = this.getState(symbol);
 			if(state==null) {
 				state = this.addState(symbol);
@@ -59,6 +60,61 @@ class RandomAnalysis extends BitStream {
 			}
 			return ent;
 		}
+		
+		
+		/*
+		constructor() {
+			this.counts = 0;
+			this.states = {};
+			this.last_state = null;
+		}
+		
+		addState(symbol) {
+			let state = {};
+			state.counts = 0;
+			state.trans = {};
+			this.states[symbol] = state;
+			return state;
+		}
+		
+		countTransition(symbol) {
+			let count = this.last_state.trans[symbol];
+			if(count==null) {
+				count = 0;
+			}
+			count++;
+			this.last_state.trans[symbol] = count;
+			this.states[symbol].counts++;
+		}
+		
+		record(symbol) {
+			this.counts++;
+			let state = this.states[symbol];
+			if(state==null) {
+				state = this.addState(symbol);
+			}
+			if(this.last_state!=null) {
+				this.countTransition(symbol);
+			}
+			this.last_state = state;
+		}
+		
+		entropy() {
+			let out = 0;
+			for(let symbol in this.states) {
+				let state = this.states[symbol];
+				let r = state.counts/this.counts; // stationary probability
+				let h = 0;
+				for(let tran_symbol in state.trans) {
+					let f = state.trans[tran_symbol]/state.counts;
+					h += f*Math.log(f);
+				}
+				out += h*r;
+			}
+			out /= -Math.log(this.counts);
+			return out;
+		}
+		*/
 		
 	}
 	
@@ -97,7 +153,13 @@ class RandomAnalysis extends BitStream {
 		
 		if(this.length()>=this.letterSize) {
 			let symbol = this.readInt(this.letterSize);
-			this.markovchain.record(symbol+"");
+			this.markovchain.record(""+symbol);
+			/*
+			if(symbol>=8) {
+				console.log("recording symbol: :"+symbol);
+				console.log(this.letterSize);
+			}
+			*/
 			this.bins[symbol]++;
 		}
 		
