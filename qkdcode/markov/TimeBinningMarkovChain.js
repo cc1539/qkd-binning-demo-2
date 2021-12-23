@@ -120,73 +120,6 @@ TimeBinningMarkovChain = class {
 	}
 	
 	entropyFromMatrix(matrix,state,modified) {
-		/*
-		let keyRate = [];
-		let entropy = [];
-		let totalRate = 0;
-		for(let i=0;i<this.stateArray.length;i++) {
-		if(this.stateArray[i].t.rate>0) {
-			let sequences = TimeBinningMarkovChain.generate(this.n,this.d,
-				this.stateArray[i].t,
-				this.stateArray[i].dl,
-				this.stateArray[i].dr);
-			let rate = state[i]/sequences.length;
-			let subentropy = 0;
-			let transitionRow = LinAlg.getrow(matrix,i);
-			let tranto = [];
-			let totalTo = 0;
-			for(let j=0;j<transitionRow.length;j++) {
-			if(transitionRow[j]>0 && this.stateArray[j].t.rate>0) {
-				let sequences0 = TimeBinningMarkovChain.generate(this.n,this.d,
-					this.stateArray[j].t,
-					this.stateArray[j].dl,
-					this.stateArray[j].dr);
-				let speed = transitionRow[j]/sequences0.length;
-				for(let keyInput of sequences0) {
-					let key = this.scheme.apply(keyInput);
-					if(tranto[key]!=null) {
-						tranto[key] += speed;
-					} else {
-						tranto[key] = speed;
-					}
-					totalTo += speed;
-				}
-			}
-			}
-			if(Object.keys(tranto).length>1) {
-				//console.log("state "+i+": "+sequences);
-				for(let key in tranto) {
-					let q = tranto[key]/totalTo;
-					subentropy += (q>0&&q<1)?(-q*log(q)):0;
-				}
-				subentropy *= rate/log(Object.keys(tranto).length);
-			} else {
-				subentropy = 0;
-			}
-			for(let keyInput of sequences) {
-				let key = this.scheme.apply(keyInput);
-				if(keyRate[key]!=null) {
-					keyRate[key] = keyRate[key]+rate;
-					entropy[key] = entropy[key]+subentropy;
-				} else {
-					keyRate[key] = rate;
-					entropy[key] = subentropy;
-				}
-				totalRate += rate;
-			}
-		}
-		}
-		let out = 0;
-		if(totalRate>0) {
-			for(let key in keyRate) {
-				let q = keyRate[key]/totalRate;
-				let ent = entropy[key]/keyRate[key];
-				out += (q>0||q<1)?(-q*log(q)*ent):0;
-			}
-			out /= log(Object.keys(keyRate).length);
-		}
-		return out;
-		*/
 		
 		let has_output = []; // whether a particular state has output bits according to the binning scheme being used
 		let output_states = []; // set of all the possible outputs from an individual frame
@@ -292,17 +225,29 @@ TimeBinningMarkovChain = class {
 			}
 			
 			let ent_i = 0;
+			let transition_sum = 0;
 			for(let i in transitions) {
 				let transition = transitions[i];
+				transition_sum += transition;
+			}
+			for(let i in transitions) {
+				let transition = transitions[i]/transition_sum;
 				if(transition>0) {
 					ent_i += transition*log(transition);
 				}
 			}
-			ent += ent_i*output_station[i];
+			
+			let transition_count = Object.keys(transitions).length;
+			if(transition_count>0) {
+				ent += -ent_i*output_station[i]/log(transition_count);
+			}
+			
 		}
 		}
 		
-		return ent/log(output_states.length);
+		//console.log(ent);
+		
+		return ent;//log(output_states.length);
 	}
 	
 	mapWeight(station,has_output) {

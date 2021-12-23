@@ -120,12 +120,6 @@ class Plot {
 				options[plotAxes.x_axis.label] = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,options.x);
 				
 				this.out[i] = new MarkovChainAnalysis(options).get();
-				if(i==1) {
-					this.analytical_scale = this.out[i];
-				}
-				if(plotAxes.y_axis.label=="H") {
-					this.out[i] /= this.analytical_scale;
-				}
 				
 				let elapsedTime = (millis()-startTime); // in milliseconds
 				if(elapsedTime>20) {

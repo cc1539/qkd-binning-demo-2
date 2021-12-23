@@ -47,13 +47,29 @@ class MarkovChainAnalysis {
 	
 	get() {
 		let p = this.p*(1-this.a)+(1-this.p)*this.f;
+		let old_label = this.label;
 		let limit = this.tbmc.transition(p);
 		let state = this.tbmc.stationaryFromMatrix(0,limit);
 		switch(this.label) {
-			case "H": { return this.tbmc.entropyFromMatrix(limit,state,true); }
-			case "R": { return this.tbmc.keyrateFromState(state); }
-			case "Rf": { return this.tbmc.entropyFromMatrix(limit,state,true)*this.tbmc.keyrateFromState(state); }
+			case "Rf": { return this.getEntropyRate(limit,state); }
+			case "H": { return this.getEntropyRatio(limit,state); }
+			case "R": { return this.getBitRate(state); }
+			case "Pe": { return 0; }
 		}
+	}
+	
+	getEntropyRatio(limit,state) {
+		return this.tbmc.entropyFromMatrix(limit,state,true);
+	}
+	
+	getBitRate(state) {
+		return this.tbmc.keyrateFromState(state);
+	}
+	
+	getEntropyRate(limit,state) {
+		let ent = this.getEntropyRatio(limit,state);
+		let key = this.getBitRate(state);
+		return ent*key;
 	}
 	
 }

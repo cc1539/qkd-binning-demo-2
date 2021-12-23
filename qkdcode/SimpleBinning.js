@@ -98,6 +98,9 @@ class SimpleBinning extends BitStream {
 					this.bitsOut++;
 					index >>>= 1;
 				}
+				if(this.analysis.length()>0) {
+					this.analysis.recordSymbol();
+				}
 			}
 		}
 		
