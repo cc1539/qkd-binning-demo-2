@@ -92,6 +92,9 @@ class BinningScheme extends BitStream {
 				this.analysis.write(bit);
 				this.bitsOut++;
 			}
+			if(this.analysis.length()>0) {
+				this.analysis.recordSymbol();
+			}
 		});
 	}
 	
@@ -104,9 +107,7 @@ class BinningScheme extends BitStream {
 		this.bitsIn = 0;
 		this.bitsOut = 0;
 		
-		this.schemes.forEach(x=>{
-			x.clear();
-		});
+		this.schemes.forEach(x=>x.clear());
 	}
 	
 	getName() {
