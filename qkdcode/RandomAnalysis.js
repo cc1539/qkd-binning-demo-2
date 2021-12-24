@@ -98,13 +98,8 @@ class RandomAnalysis extends BitStream {
 		/*
 		if(this.length()>=this.letterSize) {
 			this.recordSymbol();
-			//console.log("HEY");
 		}
 		*/
-		
-		if(this.length()>=this.letterSize) {
-			
-		}
 		
 	}
 	
