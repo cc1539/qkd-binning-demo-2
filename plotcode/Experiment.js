@@ -159,7 +159,7 @@ class Experiment {
 			case "R": { return this.requestKeyRate(); }
 			case "H": { return this.requestEntropyRatio(); }
 			case "Pe": { return this.requestErrorRate(); }
-			case "Rf": { return this.requestEntropyRate(); }
+			case "Rf": { return this.requestSharedRate(); }
 			case BITS_REQUEST: { return bit_output; }
 		}
 		
@@ -179,6 +179,10 @@ class Experiment {
 	
 	requestEntropyRate() {
 		return this.requestKeyRate()*this.requestEntropyRatio();
+	}
+	
+	requestSharedRate() {
+		return this.requestEntropyRate()*(1-this.requestErrorRate());
 	}
 	
 }
