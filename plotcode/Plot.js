@@ -46,23 +46,27 @@ class Plot {
 	refresh() {
 		
 		this.out = new Array(400).fill(0);
+		this.opt = new Array(this.out.length).fill(0).map((e,i)=>{
+			
+			let options = {
+				scheme: this.scheme,
+				errorc: this.errorc,
+				x: i/(this.out.length-1),
+				label: plotAxes.y_axis.label
+			};
+			"ndpJafBS".split("").forEach(n=>(options[n]=this[n]));
+			
+			options[plotAxes.x_axis.label] = lerp(
+					plotAxes.x_axis.minval,
+					plotAxes.x_axis.maxval,
+					options.x);
+			
+			return options;
+		});
 		
 		if(this.type=="empirical") {
 			this.samples = new Array(this.out.length).fill(0).map((e,i)=>{
-				
-				let options = {
-					scheme: this.scheme,
-					errorc: this.errorc,
-					x: i/(this.out.length-1)
-				};
-				"ndpJafBS".split("").forEach(n=>(options[n]=this[n]));
-				
-				options[plotAxes.x_axis.label] = lerp(
-						plotAxes.x_axis.minval,
-						plotAxes.x_axis.maxval,
-						options.x);
-				
-				return new Experiment(options);
+				return new Experiment(this.opt[i]);
 			});
 		} else if(this.type=="analytical") {
 			this.samples = null;
@@ -98,30 +102,18 @@ class Plot {
 			}
 		} else if(this.type=="analytical") {
 			
-			for(let i=0;i<this.out.length;i++) {
-			if(this.out[i]==null) {
-				
-				let options = {
-					scheme: this.scheme,
-					n: this.n,
-					d: this.d,
-					p: this.p,
-					J: this.J,
-					a: this.a,
-					f: this.f,
-					x: i/(this.out.length-1),
-					label: plotAxes.y_axis.label
-				};
-				
-				options[plotAxes.x_axis.label] = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,options.x);
-				
-				this.out[i] = new MarkovChainAnalysis(options).get();
-				
-				let elapsedTime = (millis()-startTime); // in milliseconds
-				if(elapsedTime>20) {
-					break;
+			for(let k=Math.floor(this.out.length/2);k>=1;k=Math.floor(k/2)) {
+				for(let i=0;i<this.out.length;i+=k) {
+				if(this.out[i]==null) {
+					
+					this.out[i] = new MarkovChainAnalysis(this.opt[i]).get();
+					
+					let elapsedTime = (millis()-startTime); // in milliseconds
+					if(elapsedTime>20) {
+						return;
+					}
 				}
-			}
+				}
 			}
 			
 		}
