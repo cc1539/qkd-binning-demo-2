@@ -56,10 +56,34 @@ class Plot {
 			};
 			"ndpJafBS".split("").forEach(n=>(options[n]=this[n]));
 			
-			options[plotAxes.x_axis.label] = lerp(
-					plotAxes.x_axis.minval,
-					plotAxes.x_axis.maxval,
-					options.x);
+			if(plotAxes.x_axis.label=="k") {
+				// change n and p to simulate bin # of frame increasing 
+				// while frame width stays constant
+				// the given p is for when a frame consists of a single bin
+				// p should go down
+				options.n = lerp(
+						plotAxes.x_axis.minval,
+						plotAxes.x_axis.maxval,
+						options.x);
+				options.n = Math.floor(options.n);
+				// p = 1-exp(-L*k)
+				// -ln(1-p) = L*k
+				// L = stays the same
+				// k = 1/options.n
+				
+				//options.p = 1-exp(ln(1-p)/options.n);
+				options.p = 1-Math.pow(1-options.p,1/options.n);
+				
+			} else {
+				options[plotAxes.x_axis.label] = lerp(
+						plotAxes.x_axis.minval,
+						plotAxes.x_axis.maxval,
+						options.x);
+						
+				if("ndBS".includes(plotAxes.x_axis.label)) {
+					options[plotAxes.x_axis.label] = Math.floor(options[plotAxes.x_axis.label]);
+				}
+			}
 			
 			return options;
 		});
@@ -102,7 +126,7 @@ class Plot {
 			}
 		} else if(this.type=="analytical") {
 			
-			for(let k=Math.floor(this.out.length/2);k>=1;k=Math.floor(k/2)) {
+			for(let k=Math.floor(this.out.length/2)-1;k>=1;k=Math.floor(k/2)) {
 				for(let i=0;i<this.out.length;i+=k) {
 				if(this.out[i]==null) {
 					
@@ -115,6 +139,7 @@ class Plot {
 				}
 				}
 			}
+			
 			
 		}
 	}
