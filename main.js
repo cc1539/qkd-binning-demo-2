@@ -3,6 +3,7 @@ var plotPalette;
 var plotColors;
 
 var binTypes = {
+	"ppm": PulsePositionModulation.prototype,
 	"sb": SimpleBinning.prototype,
 	"ab": AdaptiveBinning.prototype,
 	"aab": AdaptiveAggregatedBinning.prototype,

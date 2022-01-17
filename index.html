@@ -10,6 +10,7 @@
 		
 		<script src="qkdcode/BitStream.js"></script>
 		<script src="qkdcode/RandomAnalysis.js"></script>
+		<script src="qkdcode/PulsePositionModulation.js"></script>
 		<script src="qkdcode/SimpleBinning.js"></script>
 		<script src="qkdcode/AdaptiveBinning.js"></script>
 		<script src="qkdcode/AdaptiveAggregatedBinning.js"></script>
@@ -56,7 +57,8 @@
 					<select dir="ltr" name="x_axis">
 						<option value="p">p (bin occupancy probability)</option>
 						<option value="d">d (down time)</option>
-						<option value="n">n (frame size in bins)</option>
+						<option value="n">n (# of bins in frame, bin width constant)</option>
+						<option value="k">n (# of bins in frame, frame width constant)</option>
 						<option value="J">jitter</option>
 						<option value="a">absorption</option>
 						<option value="f">dark counts</option>
@@ -93,6 +95,7 @@
 					
 						<div class="param"><label>Bin Scheme</label>
 						<select name="scheme">
+							<option value="ppm">Pulse Position Modulation</option>
 							<option value="sb">Simple Binning</option>
 							<option value="ab">Adaptive Binning</option>
 							<option value="aab">Aggregated Adaptive Binning</option>
@@ -119,7 +122,7 @@
 						<input type="range" step="1" name="S" min="0" max="32"></div><hr>
 						
 						<div class="param"><label>Frame Size</label><input name="n" type="text" autocomplete="off" value="8"></input>
-						<input type="range" step="1" name="n" min="0" max="32"></div><hr>
+						<input type="range" step="1" name="n" min="2" max="128"></div><hr>
 						<div class="param"><label>Recovery time</label><input name="d" type="text" autocomplete="off" value="0"></input>
 						<input type="range" step="1" name="d" min="0" max="128"></div><hr>
 						<div class="param"><label>P(occupancy)</label><input name="p" type="text" autocomplete="off" value="0.01"></input>

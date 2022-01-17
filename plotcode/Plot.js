@@ -53,18 +53,14 @@ class Plot {
 				let options = {
 					scheme: this.scheme,
 					errorc: this.errorc,
-					n: this.n,
-					d: this.d,
-					p: this.p,
-					J: this.J,
-					a: this.a,
-					f: this.f,
-					B: this.B,
-					S: this.S,
 					x: i/(this.out.length-1)
 				};
+				"ndpJafBS".split("").forEach(n=>(options[n]=this[n]));
 				
-				options[plotAxes.x_axis.label] = lerp(plotAxes.x_axis.minval,plotAxes.x_axis.maxval,options.x);
+				options[plotAxes.x_axis.label] = lerp(
+						plotAxes.x_axis.minval,
+						plotAxes.x_axis.maxval,
+						options.x);
 				
 				return new Experiment(options);
 			});
