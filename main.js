@@ -159,6 +159,7 @@ function setup() {
 		// download button
 		let dl_start_time = millis();
 		let dl_end_time = millis();
+		
 		let download_sample = function(){
 			dl_start_time = millis();
 			
@@ -234,9 +235,29 @@ function setup() {
 			
 			console.log("download took "+(dl_end_time-dl_start_time)/1e3+"s");
 		}
+		
+		// export button
+		
+		let download_export = function(){
+			dl_start_time = millis();
+			
+			tikzExport(plot.out);
+			
+			dl_end_time = millis();
+			
+			hideWaitOverlay();
+			
+			console.log("download took "+(dl_end_time-dl_start_time)/1e3+"s");
+		}
+		
 		$(pc).find("#dl-sample-button").on("click",function(){
 			showWaitOverlay();
 			setTimeout(download_sample,100);
+		});
+		
+		$(pc).find("#dl-export-button").on("click",function(){
+			showWaitOverlay();
+			setTimeout(download_export,100);
 		});
 		
 		return plot;
@@ -324,3 +345,18 @@ function draw() {
 	drawPlots();
 }
 
+async function tikzExport(data) {
+	
+	let export_data = "";
+	for(let i=0;i<data.length;i++) {
+		export_data += i+" "+data[i]+"\n";
+	}
+
+	let blob = new Blob([export_data],{type:"text/plain"});
+
+	const handle = await window.showSaveFilePicker();
+	const stream = await handle.createWritable();
+
+	await stream.write(blob);
+	await stream.close();
+}

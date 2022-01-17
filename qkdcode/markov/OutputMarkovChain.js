@@ -43,6 +43,7 @@ OutputMarkovChain = class {
 			this.states[symbol] = new OutputMarkovChain.State(symbol);
 			this.transitions[symbol] = {};
 		}
+		
 		// init transitions
 		for(let a in output_states) {
 		for(let b in output_states) {
@@ -147,6 +148,11 @@ OutputMarkovChain = class {
 				let symbol = sequence_matrix[i][j];
 				this.states[symbol].steady += output_station[i];
 				for(let other_symbol in transitions) {
+					/*
+					if(this.transitions[symbol][other_symbol]==null) {
+						this.transitions[symbol][other_symbol] = 0;
+					}
+					*/
 					this.transitions[symbol][other_symbol] += transitions[other_symbol];
 				}
 			}
@@ -195,9 +201,14 @@ OutputMarkovChain = class {
 					ent_i += transition*log(transition);
 				}
 			}
-			ent += -ent_i*state.steady;
+			let transition_count = Object.keys(transitions).length;
+			if(transition_count>0) {
+				ent += -ent_i*state.steady;//log(transition_count);
+			}
 		}
-		return ent/log(Object.keys(this.states).length);
+		let state_count = Object.keys(this.states).length;
+		return ent/log(state_count);
+		//return ent;
 	}
 	
 }
