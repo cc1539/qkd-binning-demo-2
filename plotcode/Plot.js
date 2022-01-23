@@ -65,11 +65,15 @@ class Plot {
 				// while frame width stays constant
 				// the given p is for when a frame consists of a single bin
 				// p should go down
+				
+				let dn_ratio = options.d/options.n;
+				
 				options.n = lerp(
 						plotAxes.x_axis.minval,
 						plotAxes.x_axis.maxval,
 						options.x);
 				options.n = Math.floor(options.n);
+				options.d = Math.floor(options.n*dn_ratio);
 				// p = 1-exp(-L*k)
 				// -ln(1-p) = L*k
 				// L = stays the same
