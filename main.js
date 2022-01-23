@@ -350,8 +350,10 @@ async function tikzExport(data) {
 	
 	let export_data = "";
 	for(let i=0;i<data.length;i++) {
+	if(!isNaN(data[i])) {
 		let x = plotAxes.x_axis.minval+(plotAxes.x_axis.maxval-plotAxes.x_axis.minval)*(i/(data.length-1));
 		export_data += x+" "+data[i]+"\n";
+	}
 	}
 
 	let blob = new Blob([export_data],{type:"text/plain"});

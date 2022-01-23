@@ -43,6 +43,10 @@ class Plot {
 		
 	}
 	
+	optionsSame(a,b) {
+		return ["scheme","type","errorc"].concat("ndpJafBS".split('')).map(e=>a[e]==b[e]).reduce((a,b)=>a&&b,true);
+	}
+	
 	refresh() {
 		
 		this.out = new Array(400).fill(0);
@@ -87,10 +91,15 @@ class Plot {
 			
 			return options;
 		});
+		for(let i=this.opt.length-2;i>0;i--) {
+		if(this.optionsSame(this.opt[i],this.opt[i-1])) {
+			this.opt[i] = null;
+		}
+		}
 		
 		if(this.type=="empirical") {
 			this.samples = new Array(this.out.length).fill(0).map((e,i)=>{
-				return new Experiment(this.opt[i]);
+				return this.opt[i]==null?null:new Experiment(this.opt[i]);
 			});
 		} else if(this.type=="analytical") {
 			this.samples = null;
@@ -109,10 +118,14 @@ class Plot {
 			}
 			while(true) {
 				let errors = this.a>0 || this.f>0 || this.J>0;
-				this.out[this.index] = this.samples[this.index].get({
-					iterations: 100,
-					request: plotAxes.y_axis.label
-				});
+				if(this.samples[this.index]!=null) {
+					this.out[this.index] = this.samples[this.index].get({
+						iterations: 100,
+						request: plotAxes.y_axis.label
+					});
+				} else {
+					this.out[this.index] = NaN;
+				}
 				this.index++;
 				if(this.index>=this.out.length) {
 					this.index = 0;
@@ -128,7 +141,7 @@ class Plot {
 			
 			for(let k=Math.floor(this.out.length/2)-1;k>=1;k=Math.floor(k/2)) {
 				for(let i=0;i<this.out.length;i+=k) {
-				if(this.out[i]==null) {
+				if(this.out[i]==null && this.opt[i]!=null) {
 					
 					this.out[i] = new MarkovChainAnalysis(this.opt[i]).get();
 					
