@@ -76,7 +76,12 @@ TimeBinningMarkovChain = class {
 		let state = LinAlg.row(Array(matrix.length).fill(0));
 		let lastState = state;
 		state[init][0] = 1;
-		for(let i=0;i<256;i++) {
+		
+		for(let i=0;i<10;i++) {
+			matrix = LinAlg.multiply(matrix,matrix);
+		}
+		
+		for(let i=0;i<10;i++) {
 		  state = LinAlg.multiply(state,matrix);
 		  let error = 0;
 		  for(let j=0;j<state.length;j++) {
